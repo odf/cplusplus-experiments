@@ -6,94 +6,72 @@
 namespace odf
 {
 
-
 template<typename T>
-class LinkedList : public std::tr1::shared_ptr<T>
+class LinkedList
 {
 protected:
-    class LinkedListIterator
-    {
-    private:
-        LinkedList &current_;
-        friend class LinkedList;
+    typedef T(*FunPtr)();
 
-        LinkedListIterator(LinkedList &list) :
-            current_(list)
-        {
-        }
+    FunPtr code_;
+    T value_;
+    LinkedList *next_;
 
-    public:
-        LinkedListIterator operator++()
-        {
-            current_ = current_.next();
-        }
-
-        const T operator*() const
-        {
-            return *current_;
-        }
-
-        const bool operator!=(const LinkedListIterator other) const
-        {
-            return current_ != other.current_;
-        }
-    };
-
-    typedef std::tr1::shared_ptr<T> Ptr;
-
-    const LinkedList *next_;
-
-    LinkedList(const LinkedList *next) :
-        Ptr(),
+public:
+    LinkedList(FunPtr code, LinkedList *next) :
+        code_(code),
         next_(next)
     {
     }
+    
+    LinkedList(FunPtr code) :
+        code_(code),
+        next_(0)
+    {
+    }
 
-public:
-    LinkedList(const T value, const LinkedList *next) :
-        Ptr(new T(value)),
+    LinkedList(const T value, LinkedList *next) :
+        value_(value),
+        code_(0),
         next_(next)
     {
     }
     
     LinkedList(const T value) :
-        Ptr(new T(value)),
+        value_(value),
+        code_(0),
         next_(0)
     {
     }
 
     LinkedList() :
-        Ptr(),
+        code_(0),
         next_(0)
     {
     }
 
-    const LinkedList next() const
+    const T value()
     {
-        return next_ ? *next_ : LinkedList();
+        if (code_ != 0)
+        {
+            value_ = (*code_)();
+            code_ = 0;
+        }
+        return value_;
     }
 
-    const bool operator==(const LinkedList other) const
+    LinkedList *next() const
     {
-        return Ptr::get() == other.Ptr::get()
-            && (void *) next_ == (void *) other.next_;
+        return next_;
     }
 
-    const bool operator!=(const LinkedList other) const
+    const bool operator==(const LinkedList &other) const
     {
-        return Ptr::get() != other.Ptr::get()
-            || (void *) next_ != (void *) other.next_;
+        return **this == *other && (void *) next_ == (void *) other.next_;
     }
 
-    LinkedListIterator begin()
+    const bool operator!=(const LinkedList &other) const
     {
-        return (LinkedListIterator) *this;
-    }
-
-    LinkedListIterator end()
-    {
-        static LinkedList empty;
-        return (LinkedListIterator) empty;
+        return **this != *other || (void *) next_ != (void *) other.next_;
     }
 };
 

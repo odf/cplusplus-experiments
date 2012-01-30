@@ -1,11 +1,9 @@
-#include <algorithm>
 #include <iostream>
 #include "LinkedList.hpp"
-#include "LazyList.hpp"
 
 void printValue(int val)
 {
-    std::cout << " " << val;
+    std::cout << "--" << val << "--" << std::endl;
 }
 
 int _1()
@@ -20,18 +18,18 @@ int _2()
     return 2;
 }
 
-//typedef odf::LinkedList<int> IntList;
-typedef odf::LazyList<int> IntList;
+typedef odf::LinkedList<int> IntList;
 
 int main()
 {
     IntList one(_1);
     IntList two(_2, &one);
+    IntList three(3, &two);
 
-    std::cout << "*two = " << *two << std::endl;
-    std::cout << "*two = " << *two << std::endl;
-    std::cout << "*one = " << *one << std::endl;
-    std::cout << "*one = " << *one << std::endl;
-
-    std::for_each(two.begin(), two.end(), printValue);
+    std::cout << three.value() << " "
+              << three.next()->value() << " "
+              << three.next()->next()->value() << std::endl;
+    std::cout << three.value() << " "
+              << three.next()->value() << " "
+              << three.next()->next()->value() << std::endl;
 }
