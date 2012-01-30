@@ -6,32 +6,23 @@
 namespace odf
 {
 
+
 template<typename T>
 class LinkedList : public std::tr1::shared_ptr<T>
 {
 private:
-    typedef std::tr1::shared_ptr<T> Ptr;
-
-    const LinkedList *next_;
-
-public:
-    class Iterator
+    class LinkedListIterator
     {
     private:
-        LinkedList &current_;
+        LinkedList<T> &current_;
 
     public:
-        Iterator(LinkedList &list) :
+        LinkedListIterator(LinkedList<T> &list) :
             current_(list)
         {
         }
 
-        Iterator(const Iterator &source) :
-            current_(source.current_)
-        {
-        }
-
-        Iterator operator++()
+        LinkedListIterator operator++()
         {
             current_ = current_.next();
         }
@@ -41,12 +32,17 @@ public:
             return *current_;
         }
 
-        const bool operator!=(const Iterator other) const
+        const bool operator!=(const LinkedListIterator other) const
         {
             return current_ != other.current_;
         }
     };
 
+    typedef std::tr1::shared_ptr<T> Ptr;
+
+    const LinkedList *next_;
+
+public:
     LinkedList<T>(const T value, const LinkedList *next) :
         Ptr(new T(value)),
         next_(next)
@@ -80,6 +76,17 @@ public:
     {
         return Ptr::get() != other.Ptr::get()
             || (void *) next_ != (void *) other.next_;
+    }
+
+    LinkedListIterator begin()
+    {
+        return (LinkedListIterator) *this;
+    }
+
+    LinkedListIterator end()
+    {
+        static LinkedList empty;
+        return (LinkedListIterator) empty;
     }
 };
 
