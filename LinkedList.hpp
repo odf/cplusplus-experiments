@@ -11,35 +11,41 @@ class LinkedList
 {
 protected:
     typedef T(*FunPtr)();
+    typedef std::tr1::shared_ptr<LinkedList> Ptr;
 
     FunPtr code_;
     T value_;
-    LinkedList *next_;
+    Ptr next_;
+    Ptr self_;
 
 public:
-    LinkedList(FunPtr code, LinkedList *next) :
+    LinkedList(FunPtr code, Ptr next) :
         code_(code),
-        next_(next)
+        next_(next),
+        self_(Ptr())
     {
     }
     
     LinkedList(FunPtr code) :
         code_(code),
-        next_(0)
+        next_(Ptr()),
+        self_(Ptr())
     {
     }
 
-    LinkedList(const T value, LinkedList *next) :
+    LinkedList(const T value, Ptr next) :
         value_(value),
         code_(0),
-        next_(next)
+        next_(next),
+        self_(Ptr())
     {
     }
     
     LinkedList(const T value) :
         value_(value),
         code_(0),
-        next_(0)
+        next_(Ptr()),
+        self_(Ptr())
     {
     }
 
@@ -53,9 +59,21 @@ public:
         return value_;
     }
 
-    LinkedList *next() const
+    Ptr next() const
     {
         return next_;
+    }
+
+    Ptr operator&()
+    {
+        if (self_.get() == 0)
+        {
+            LinkedList *l = new LinkedList(code_, next_);
+            l->value_ = value_;
+            l->self_ = self_;
+            self_.reset(l);
+        }
+        return self_;
     }
 };
 
