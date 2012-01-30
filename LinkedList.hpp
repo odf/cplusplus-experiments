@@ -10,7 +10,7 @@ namespace odf
 template<typename T>
 class LinkedList : public std::tr1::shared_ptr<T>
 {
-private:
+protected:
     class LinkedListIterator
     {
     private:
@@ -42,6 +42,12 @@ private:
     typedef std::tr1::shared_ptr<T> Ptr;
 
     const LinkedList *next_;
+
+    LinkedList(const LinkedList *next) :
+        Ptr(),
+        next_(next)
+    {
+    }
 
 public:
     LinkedList(const T value, const LinkedList *next) :
