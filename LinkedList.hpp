@@ -43,12 +43,6 @@ public:
     {
     }
 
-    LinkedList() :
-        code_(0),
-        next_(0)
-    {
-    }
-
     const T value()
     {
         if (code_ != 0)
@@ -62,16 +56,6 @@ public:
     LinkedList *next() const
     {
         return next_;
-    }
-
-    const bool operator==(const LinkedList &other) const
-    {
-        return **this == *other && (void *) next_ == (void *) other.next_;
-    }
-
-    const bool operator!=(const LinkedList &other) const
-    {
-        return **this != *other || (void *) next_ != (void *) other.next_;
     }
 };
 
