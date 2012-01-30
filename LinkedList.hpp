@@ -14,14 +14,15 @@ private:
     class LinkedListIterator
     {
     private:
-        LinkedList<T> &current_;
+        LinkedList &current_;
+        friend class LinkedList;
 
-    public:
-        LinkedListIterator(LinkedList<T> &list) :
+        LinkedListIterator(LinkedList &list) :
             current_(list)
         {
         }
 
+    public:
         LinkedListIterator operator++()
         {
             current_ = current_.next();
@@ -43,36 +44,36 @@ private:
     const LinkedList *next_;
 
 public:
-    LinkedList<T>(const T value, const LinkedList *next) :
+    LinkedList(const T value, const LinkedList *next) :
         Ptr(new T(value)),
         next_(next)
     {
     }
     
-    LinkedList<T>(const T value) :
+    LinkedList(const T value) :
         Ptr(new T(value)),
         next_(0)
     {
     }
 
-    LinkedList<T>() :
+    LinkedList() :
         Ptr(),
         next_(0)
     {
     }
 
-    const LinkedList<T> next() const
+    const LinkedList next() const
     {
         return next_ ? *next_ : LinkedList();
     }
 
-    const bool operator==(const LinkedList<T> other) const
+    const bool operator==(const LinkedList other) const
     {
         return Ptr::get() == other.Ptr::get()
             && (void *) next_ == (void *) other.next_;
     }
 
-    const bool operator!=(const LinkedList<T> other) const
+    const bool operator!=(const LinkedList other) const
     {
         return Ptr::get() != other.Ptr::get()
             || (void *) next_ != (void *) other.next_;
