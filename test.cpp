@@ -1,13 +1,27 @@
+#include <algorithm>
 #include <iostream>
 #include "LinkedList.hpp"
 
+void printValue(int val)
+{
+    std::cout << " " << val;
+}
+
+typedef odf::LinkedList<int> IntList;
+typedef IntList::Iterator Iter;
+
 int main()
 {
-    odf::LinkedList<int> one(1);
-    odf::LinkedList<int> two(2, &one);
+    IntList empty;
+    IntList one(1);
+    IntList two(2, &one);
 
     std::cout << "First:  " << *two << std::endl;
     std::cout << "Second: " << *two.next() << std::endl;
-    std::cout << "First is last:  " << (two.next() == 0) << std::endl;
-    std::cout << "Second is last: " << (two.next().next() == 0) << std::endl;
+    std::cout << "First is last:  " << (two.next() == empty) << std::endl;
+    std::cout << "Second is last: " << (two.next().next() == empty) << std::endl;
+    std::cout << "First is not last:  " << (two.next() != empty) << std::endl;
+    std::cout << "Second is not last: " << (two.next().next() != empty) << std::endl;
+
+    std::for_each((Iter) two, (Iter) empty, printValue);
 }
