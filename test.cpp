@@ -32,20 +32,20 @@ void print_twice(F f, std::string t)
 }
 
 
-typedef LinkedList<int> IntList;
+typedef AbstractList<int>::Ptr List;
 
 int main()
 {
-    IntList one(make_1);
-    IntList two(make_2, &one);
-    IntList three(3, &two);
+    List one = &makeList<int>(make_1);
+    List two = &makeList<int>(make_2, one);
+    List three = &makeList<int>(make_3, two);
 
-    std::cout << three.value() << " "
-              << three.next()->value() << " "
-              << three.next()->next()->value() << std::endl;
-    std::cout << three.value() << " "
-              << three.next()->value() << " "
-              << three.next()->next()->value() << std::endl;
+    std::cout << three->value() << " "
+              << three->next()->value() << " "
+              << three->next()->next()->value() << std::endl;
+    std::cout << three->value() << " "
+              << three->next()->value() << " "
+              << three->next()->next()->value() << std::endl;
 
     print_twice(makeThunk<int>(make_3), "thunk() = ");
 }

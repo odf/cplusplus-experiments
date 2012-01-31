@@ -7,11 +7,23 @@
 namespace odf
 {
 
-template<typename T, typename Functor = T(*)()>
-class LinkedList
+template<typename T>
+class AbstractList
 {
+public:
+    typedef std::tr1::shared_ptr<AbstractList<T> > Ptr;
+    virtual const T value() = 0;
+    virtual Ptr next() const = 0;
+};
+
+
+template<typename T, typename Functor = T(*)()>
+class LinkedList : public AbstractList<T>
+{
+public:
+    typename AbstractList<T>::Ptr typedef Ptr;
+
 protected:
-    typedef std::tr1::shared_ptr<LinkedList> Ptr;
     typedef Thunk<T, Functor> Data;
 
     Data content_;
@@ -47,12 +59,26 @@ public:
     {
         if (self_.get() == 0)
         {
-            self_.reset(new LinkedList(*this));
-            self_->self_ = self_;
+            LinkedList *self = new LinkedList(*this);
+            self->self_ = self_;
+            self_.reset(self);
         }
         return self_;
     }
 };
+
+template<typename T, typename Functor>
+LinkedList<T, Functor> makeList(const Functor code)
+{
+    return LinkedList<T, Functor>(code);
+}
+
+template<typename T, typename Functor>
+LinkedList<T, Functor> makeList(const Functor code,
+                                const typename AbstractList<T>::Ptr next)
+{
+    return LinkedList<T, Functor>(code, next);
+}
 
 }
 
