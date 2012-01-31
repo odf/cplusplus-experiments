@@ -12,54 +12,30 @@ class LinkedList
 {
 protected:
     typedef std::tr1::shared_ptr<LinkedList> Ptr;
+    typedef Thunk<T, Functor> Data;
 
-    Functor code_;
-    T value_;
-    bool resolved_;
+    Data content_;
     Ptr next_;
     Ptr self_;
 
 public:
-    LinkedList(Functor code, Ptr next) :
-        code_(code),
-        resolved_(false),
+    LinkedList(Data content, Ptr next) :
+        content_(content),
         next_(next),
-        self_(Ptr())
+        self_()
     {
     }
     
-    LinkedList(Functor code) :
-        code_(code),
-        resolved_(false),
-        next_(Ptr()),
-        self_(Ptr())
-    {
-    }
-
-    LinkedList(const T value, Ptr next) :
-        value_(value),
-        resolved_(true),
-        next_(next),
-        self_(Ptr())
-    {
-    }
-    
-    LinkedList(const T value) :
-        value_(value),
-        resolved_(true),
-        next_(Ptr()),
-        self_(Ptr())
+    LinkedList(Data content) :
+        content_(content),
+        next_(),
+        self_()
     {
     }
 
     const T value()
     {
-        if (!resolved_)
-        {
-            value_ = code_();
-            resolved_ = true;
-        }
-        return value_;
+        return content_();
     }
 
     Ptr next() const
