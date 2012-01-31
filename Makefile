@@ -1,5 +1,7 @@
+CXXFLAGS = -g -O3
+
 test:	test.o
-	g++ test.o -o test
+	$(CXX) $(CXXFLAGS) test.o -o test
 	./test
 
 # DO NOT DELETE

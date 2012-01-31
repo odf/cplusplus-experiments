@@ -6,28 +6,30 @@
 namespace odf
 {
 
-template<typename T>
+template<typename T, typename Functor = T(*)()>
 class LinkedList
 {
 protected:
-    typedef T(*FunPtr)();
     typedef std::tr1::shared_ptr<LinkedList> Ptr;
 
-    FunPtr code_;
+    Functor code_;
     T value_;
+    bool resolved_;
     Ptr next_;
     Ptr self_;
 
 public:
-    LinkedList(FunPtr code, Ptr next) :
+    LinkedList(Functor code, Ptr next) :
         code_(code),
+        resolved_(false),
         next_(next),
         self_(Ptr())
     {
     }
     
-    LinkedList(FunPtr code) :
+    LinkedList(Functor code) :
         code_(code),
+        resolved_(false),
         next_(Ptr()),
         self_(Ptr())
     {
@@ -35,7 +37,7 @@ public:
 
     LinkedList(const T value, Ptr next) :
         value_(value),
-        code_(0),
+        resolved_(true),
         next_(next),
         self_(Ptr())
     {
@@ -43,18 +45,27 @@ public:
     
     LinkedList(const T value) :
         value_(value),
-        code_(0),
+        resolved_(true),
         next_(Ptr()),
         self_(Ptr())
     {
     }
 
+    LinkedList(const LinkedList &source) :
+        value_(source.value_),
+        code_(source.code_),
+        resolved_(source.resolved_),
+        next_(source.next_),
+        self_(source.self_)
+    {
+    }
+
     const T value()
     {
-        if (code_ != 0)
+        if (!resolved_)
         {
-            value_ = (*code_)();
-            code_ = 0;
+            value_ = code_();
+            resolved_ = true;
         }
         return value_;
     }
@@ -68,10 +79,7 @@ public:
     {
         if (self_.get() == 0)
         {
-            LinkedList *l = new LinkedList(code_, next_);
-            l->value_ = value_;
-            l->self_ = self_;
-            self_.reset(l);
+            self_.reset(new LinkedList(*this));
         }
         return self_;
     }

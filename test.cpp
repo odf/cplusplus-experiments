@@ -1,29 +1,53 @@
 #include <iostream>
 #include "LinkedList.hpp"
 
-void printValue(int val)
+template<typename T, typename P>
+class Closure
 {
-    std::cout << "--" << val << "--" << std::endl;
+private:
+    typedef T(*FunPtr)(const P);
+
+    const FunPtr code_;
+    const P arg_;
+public:
+    Closure() :
+        code_(),
+        arg_()
+    {
+    }
+
+    Closure(const FunPtr code, const P arg) :
+        code_(code),
+        arg_(arg)
+    {
+    }
+
+    T operator()() const
+    {
+        return (*code_)(arg_);
+    }
+};
+
+template<typename T, typename P>
+Closure<T, P> closure(T(&code)(P), P arg)
+{
+    return Closure<T, P>(code, arg);
 }
 
-int _1()
+
+int makeInt(const int n)
 {
-    std::cout << "Computing the value 1" << std::endl;
-    return 1;
+    std::cout << "makeInt(" << n << ")" << std::endl;
+    return n;
 }
 
-int _2()
-{
-    std::cout << "Computing the value 2" << std::endl;
-    return 2;
-}
 
-typedef odf::LinkedList<int> IntList;
+typedef odf::LinkedList<int, Closure<int, int> > IntList;
 
 int main()
 {
-    IntList one(_1);
-    IntList two(_2, &one);
+    IntList one(closure(makeInt, 1));
+    IntList two(closure(makeInt, 2), &one);
     IntList three(3, &two);
 
     std::cout << three.value() << " "
