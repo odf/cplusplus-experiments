@@ -11,12 +11,12 @@ int makeInt(const int n)
 
 int make_1()
 {
-    return makeInt(3);
+    return makeInt(1);
 }
 
 int make_2()
 {
-    return makeInt(3);
+    return makeInt(2);
 }
 
 int make_3()
