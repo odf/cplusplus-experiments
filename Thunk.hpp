@@ -7,27 +7,27 @@ namespace odf
 template<typename T, typename Functor>
 class Thunk {
 private:
-    const Functor code_;
     bool pending_;
-    T value_;
+    union
+    {
+        Functor code_;
+        T value_;
+    };
 
 public:
     Thunk() :
-        code_(),
         pending_(false),
         value_()
     {
     }
 
     Thunk(const Functor code) :
-        code_(code),
         pending_(true),
-        value_()
+        code_(code)
     {
     }
 
     Thunk(T value) :
-        code_(),
         pending_(false),
         value_(value)
     {
