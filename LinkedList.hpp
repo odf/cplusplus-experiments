@@ -1,7 +1,8 @@
 #ifndef ODF_LINKEDLIST_HPP
-#define ODF_LINKEDLIST_HPP
+#define ODF_LINKEDLIST_HPP 1
 
 #include <tr1/memory>
+#include "Thunk.hpp"
 
 namespace odf
 {
@@ -48,15 +49,6 @@ public:
         resolved_(true),
         next_(Ptr()),
         self_(Ptr())
-    {
-    }
-
-    LinkedList(const LinkedList &source) :
-        value_(source.value_),
-        code_(source.code_),
-        resolved_(source.resolved_),
-        next_(source.next_),
-        self_(source.self_)
     {
     }
 

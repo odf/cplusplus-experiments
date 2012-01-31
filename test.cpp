@@ -1,14 +1,28 @@
 #include <iostream>
 #include "LinkedList.hpp"
 
+using namespace odf;
+
 int makeInt(const int n)
 {
     std::cout << "makeInt(" << n << ")" << std::endl;
     return n;
 }
 
+int make_3()
+{
+    return makeInt(3);
+}
 
-typedef odf::LinkedList<int> IntList;
+template<typename F>
+void print_twice(F f, std::string t)
+{
+    std::cout << t << f() << std::endl;
+    std::cout << t << f() << std::endl;
+}
+
+
+typedef LinkedList<int> IntList;
 
 int main()
 {
@@ -22,4 +36,6 @@ int main()
     std::cout << three.value() << " "
               << three.next()->value() << " "
               << three.next()->next()->value() << std::endl;
+
+    print_twice(makeThunk<int>(make_3), "thunk() = ");
 }

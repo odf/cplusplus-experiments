@@ -6,4 +6,4 @@ test:	test.o
 
 # DO NOT DELETE
 
-test.o: LinkedList.hpp
+test.o: LinkedList.hpp Thunk.hpp
