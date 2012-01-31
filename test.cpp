@@ -9,6 +9,16 @@ int makeInt(const int n)
     return n;
 }
 
+int make_1()
+{
+    return makeInt(3);
+}
+
+int make_2()
+{
+    return makeInt(3);
+}
+
 int make_3()
 {
     return makeInt(3);
@@ -26,8 +36,8 @@ typedef LinkedList<int> IntList;
 
 int main()
 {
-    IntList one([&] () { return makeInt(1); });
-    IntList two([&] () { return makeInt(2); }, &one);
+    IntList one(make_1);
+    IntList two(make_2, &one);
     IntList three(3, &two);
 
     std::cout << three.value() << " "
