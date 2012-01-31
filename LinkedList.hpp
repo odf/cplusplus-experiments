@@ -48,6 +48,7 @@ public:
         if (self_.get() == 0)
         {
             self_.reset(new LinkedList(*this));
+            self_->self_ = self_;
         }
         return self_;
     }
