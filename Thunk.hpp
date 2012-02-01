@@ -15,7 +15,7 @@ struct nullstream
 };
 
 template<typename T>
-inline nullstream& operator<<(nullstream& ns, T)
+nullstream& operator<<(nullstream& ns, T)
 {
     return ns;
 }
