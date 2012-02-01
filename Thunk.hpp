@@ -8,11 +8,8 @@ template<typename T, typename Functor>
 class Thunk {
 private:
     bool pending_;
-    union
-    {
-        Functor code_;
-        T value_;
-    };
+    Functor code_;
+    T value_;
 
 public:
     Thunk() :
