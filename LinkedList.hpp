@@ -1,6 +1,7 @@
 #ifndef ODF_LINKEDLIST_HPP
 #define ODF_LINKEDLIST_HPP 1
 
+#include <iostream>
 #include <tr1/memory>
 #include "Thunk.hpp"
 
@@ -46,6 +47,11 @@ public:
         rest_(),
         self_()
     {
+    }
+
+    ~ListLinkImpl()
+    {
+        std::cout << "Releasing list link with thunk " << content_ << std::endl;
     }
 
     const T first()
