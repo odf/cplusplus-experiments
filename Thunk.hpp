@@ -10,11 +10,21 @@ namespace odf
 #ifdef DEBUG
 std::ostream& log = std::cout;
 #else
-struct nullstream:
-public std::ostream
+struct nullstream
 {
-    nullstream(): std::ios(0), std::ostream(0) {}
 };
+
+template<typename T>
+inline nullstream& operator<<(nullstream& ns, T)
+{
+    return ns;
+}
+
+inline nullstream& operator<<(nullstream& ns,
+                              std::ostream& (*)(std::ostream&))
+{
+    return ns;
+}
 
 nullstream log;
 #endif
