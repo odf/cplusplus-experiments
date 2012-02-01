@@ -16,22 +16,50 @@ private:
     T value_;
 
 public:
+    ThunkImpl() :
+        pending_(false)
+    {
+        std::cout << "Constructing empty ThunkImpl     => " << *this
+                  << std::endl;
+    }
+
     ThunkImpl(const Functor code) :
         pending_(true),
         code_(code)
     {
+        std::cout << "Constructing delayed ThunkImpl   => " << this
+                  << std::endl;
     }
 
     ThunkImpl(T value) :
         pending_(false),
         value_(value)
     {
+        std::cout << "Constructing immediate ThunkImpl => " << this
+                  << std::endl;
+    }
+
+    ThunkImpl(const ThunkImpl& other) :
+        pending_(other.pending_),
+        code_(other.code_),
+        value_(other.value_)
+    {
+        std::cout << "  Copying ThunkImpl " << other << "  => " << this
+                  << std::endl;
+    }
+
+    ~ThunkImpl()
+    {
+        std::cout << "  Destroying ThunkImpl              " << this
+                  << std::endl;
     }
 
     T operator() ()
     {
         if (pending_)
         {
+            std::cout << "  Forcing ThunkImpl                 " << this
+                      << std::endl;
             value_ = code_();
             pending_ = false;
         }
@@ -48,43 +76,19 @@ private:
     Ptr content_;
 
 public:
-    Thunk() :
-        content_()
-    {
-        std::cout << "Constructing empty Thunk     => " << *this
-                  << std::endl;
-    }
-
     Thunk(const Functor code) :
         content_(Ptr(new ThunkImpl<T, Functor>(code)))
     {
-        std::cout << "Constructing delayed Thunk   => " << *this
-                  << std::endl;
     }
 
     Thunk(T value) :
         content_(Ptr(new ThunkImpl<T, Functor>(value)))
     {
-        std::cout << "Constructing immediate Thunk => " << *this
-                  << std::endl;
-    }
-
-    Thunk(const Thunk& other) :
-        content_(other.content_)
-    {
-        std::cout << "  Copying Thunk " << other << "  => " << *this
-                  << std::endl;
     }
 
     T operator() ()
     {
         return content_->operator()();
-    }
-
-    friend std::ostream& operator<<(std::ostream& out, const Thunk& obj)
-    {
-        out << obj.content_.get();
-        return out;
     }
 };
 
