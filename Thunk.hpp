@@ -7,6 +7,19 @@
 namespace odf
 {
 
+struct nullstream:
+public std::ostream
+{
+    nullstream(): std::ios(0), std::ostream(0) {}
+};
+
+#ifdef DEBUG
+std::ostream& log = std::cout;
+#else
+nullstream log;
+#endif
+
+
 template<typename T, typename Functor>
 class ThunkImpl
 {
@@ -19,24 +32,24 @@ public:
     ThunkImpl() :
         pending_(false)
     {
-        std::cout << "Constructing empty ThunkImpl     => " << *this
-                  << std::endl;
+        log << "Constructing empty ThunkImpl     => " << this
+            << std::endl;
     }
 
     ThunkImpl(const Functor code) :
         pending_(true),
         code_(code)
     {
-        std::cout << "Constructing delayed ThunkImpl   => " << this
-                  << std::endl;
+        log << "Constructing delayed ThunkImpl   => " << this
+            << std::endl;
     }
 
     ThunkImpl(T value) :
         pending_(false),
         value_(value)
     {
-        std::cout << "Constructing immediate ThunkImpl => " << this
-                  << std::endl;
+        log << "Constructing immediate ThunkImpl => " << this
+            << std::endl;
     }
 
     ThunkImpl(const ThunkImpl& other) :
@@ -44,22 +57,22 @@ public:
         code_(other.code_),
         value_(other.value_)
     {
-        std::cout << "  Copying ThunkImpl " << other << "  => " << this
-                  << std::endl;
+        log << "  Copying ThunkImpl " << other << "  => " << this
+            << std::endl;
     }
 
     ~ThunkImpl()
     {
-        std::cout << "  Destroying ThunkImpl              " << this
-                  << std::endl;
+        log << "  Destroying ThunkImpl              " << this
+            << std::endl;
     }
 
     T operator() ()
     {
         if (pending_)
         {
-            std::cout << "  Forcing ThunkImpl                 " << this
-                      << std::endl;
+            log << "  Forcing ThunkImpl                 " << this
+                << std::endl;
             value_ = code_();
             pending_ = false;
         }
