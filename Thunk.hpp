@@ -1,44 +1,30 @@
 #ifndef ODF_THUNK_HPP
 #define ODF_THUNK_HPP 1
 
+#include <tr1/memory>
 #include <iostream>
 
 namespace odf
 {
 
 template<typename T, typename Functor>
-class Thunk {
+class ThunkImpl
+{
 private:
     bool pending_;
     Functor code_;
     T value_;
-    int id_;
-
-    size_t makeId()
-    {
-        static size_t next_id = 0;
-        return ++next_id;
-    }
 
 public:
-    Thunk() :
-        pending_(false),
-        value_(),
-        id_(makeId())
-    {
-    }
-
-    Thunk(const Functor code) :
+    ThunkImpl(const Functor code) :
         pending_(true),
-        code_(code),
-        id_(makeId())
+        code_(code)
     {
     }
 
-    Thunk(T value) :
+    ThunkImpl(T value) :
         pending_(false),
-        value_(value),
-        id_(makeId())
+        value_(value)
     {
     }
 
@@ -51,16 +37,53 @@ public:
         }
         return value_;
     }
+};
 
-    friend std::ostream& operator<<(std::ostream& out, Thunk& obj)
+template<typename T, typename Functor>
+class Thunk
+{
+private:
+    typename std::tr1::shared_ptr<ThunkImpl<T, Functor> > typedef Ptr;
+
+    Ptr content_;
+
+public:
+    Thunk() :
+        content_()
     {
-        out << "Thunk{id=" << obj.id_ << "}(";
-        if (obj.pending_)
-            out << "...";
-        else
-            out << obj();
-        out << ")";
-        
+        std::cout << "Constructing empty Thunk     => " << *this
+                  << std::endl;
+    }
+
+    Thunk(const Functor code) :
+        content_(Ptr(new ThunkImpl<T, Functor>(code)))
+    {
+        std::cout << "Constructing delayed Thunk   => " << *this
+                  << std::endl;
+    }
+
+    Thunk(T value) :
+        content_(Ptr(new ThunkImpl<T, Functor>(value)))
+    {
+        std::cout << "Constructing immediate Thunk => " << *this
+                  << std::endl;
+    }
+
+    Thunk(const Thunk& other) :
+        content_(other.content_)
+    {
+        std::cout << "  Copying Thunk " << other << "  => " << *this
+                  << std::endl;
+    }
+
+    T operator() ()
+    {
+        return content_->operator()();
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const Thunk& obj)
+    {
+        out << obj.content_.get();
         return out;
     }
 };
