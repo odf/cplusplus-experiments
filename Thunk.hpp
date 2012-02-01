@@ -7,15 +7,15 @@
 namespace odf
 {
 
+#ifdef DEBUG
+std::ostream& log = std::cout;
+#else
 struct nullstream:
 public std::ostream
 {
     nullstream(): std::ios(0), std::ostream(0) {}
 };
 
-#ifdef DEBUG
-std::ostream& log = std::cout;
-#else
 nullstream log;
 #endif
 
