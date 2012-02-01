@@ -29,10 +29,10 @@ constant_functor<T> constant(const T val)
 
 int main()
 {
-    List<int> one   = makeList<int>(constant(1));
-    List<int> two   = makeList<int>(constant(2), one);
-    List<int> three = makeList<int>(constant(3), two);
-    List<int> four  = makeList<int>(constant(4), two);
+    List<int> one   = cons<int>(constant(1));
+    List<int> two   = cons<int>(constant(2), one);
+    List<int> three = cons<int>(constant(3), two);
+    List<int> four  = cons<int>(constant(4), two);
 
     std::cout << three->first() << " "
               << three->rest()->first() << " "

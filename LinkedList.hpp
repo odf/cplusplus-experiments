@@ -71,13 +71,13 @@ public:
 };
 
 template<typename T, typename Functor>
-List<T> makeList(const Functor code)
+List<T> cons(const Functor code)
 {
     return &ListLink<T, Functor>(code);
 }
 
 template<typename T, typename Functor>
-List<T> makeList(const Functor code, const List<T> rest)
+List<T> cons(const Functor code, const List<T> rest)
 {
     return &ListLink<T, Functor>(code, rest);
 }
