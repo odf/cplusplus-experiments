@@ -42,24 +42,21 @@ public:
     ThunkImpl() :
         pending_(false)
     {
-        log << "Constructing empty ThunkImpl     => " << this
-            << std::endl;
+        log << "Making empty ThunkImpl   => " << this << std::endl;
     }
 
     ThunkImpl(const Functor code) :
         pending_(true),
         code_(code)
     {
-        log << "Constructing delayed ThunkImpl   => " << this
-            << std::endl;
+        log << "Making delayed ThunkImpl => " << this << std::endl;
     }
 
     ThunkImpl(T value) :
         pending_(false),
         value_(value)
     {
-        log << "Constructing immediate ThunkImpl => " << this
-            << std::endl;
+        log << "Making direct ThunkImpl  => " << this << std::endl;
     }
 
     ThunkImpl(const ThunkImpl& other) :
@@ -67,22 +64,20 @@ public:
         code_(other.code_),
         value_(other.value_)
     {
-        log << "  Copying ThunkImpl " << other << "  => " << this
-            << std::endl;
+        log << "  Copying ThunkImpl " << other << "  => "
+            << this << std::endl;
     }
 
     ~ThunkImpl()
     {
-        log << "  Destroying ThunkImpl              " << this
-            << std::endl;
+        log << "  Destroying ThunkImpl      " << this << std::endl;
     }
 
     T operator() ()
     {
         if (pending_)
         {
-            log << "  Forcing ThunkImpl                 " << this
-                << std::endl;
+            log << "  Forcing ThunkImpl         " << this << std::endl;
             value_ = code_();
             pending_ = false;
         }
