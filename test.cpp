@@ -35,20 +35,18 @@ void print_twice(F f, std::string t)
 }
 
 
-typedef AbstractList<int>::Ptr List;
-
 int main()
 {
-    List one = &makeList<int>(constant(1));
-    List two = &makeList<int>(constant(2), one);
-    List three = &makeList<int>(constant(3), two);
+    List<int> one   = makeList<int>(constant(1));
+    List<int> two   = makeList<int>(constant(2), one);
+    List<int> three = makeList<int>(constant(3), two);
 
-    std::cout << three->value() << " "
-              << three->next()->value() << " "
-              << three->next()->next()->value() << std::endl;
-    std::cout << three->value() << " "
-              << three->next()->value() << " "
-              << three->next()->next()->value() << std::endl;
+    std::cout << three->first() << " "
+              << three->rest()->first() << " "
+              << three->rest()->rest()->first() << std::endl;
+    std::cout << three->first() << " "
+              << three->rest()->first() << " "
+              << three->rest()->rest()->first() << std::endl;
 
     print_twice(makeThunk<int>(constant(4)), "thunk() = ");
 }

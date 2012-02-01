@@ -8,58 +8,61 @@ namespace odf
 {
 
 template<typename T>
-class AbstractList
+class ListLink;
+
+template<typename T>
+class List : public std::tr1::shared_ptr<ListLink<T> >
 {
-public:
-    typedef std::tr1::shared_ptr<AbstractList<T> > Ptr;
-    virtual const T value() = 0;
-    virtual Ptr next() const = 0;
 };
 
-
-template<typename T, typename Functor = T(*)()>
-class LinkedList : public AbstractList<T>
+template<typename T>
+class ListLink
 {
 public:
-    typename AbstractList<T>::Ptr typedef Ptr;
+    virtual const T first() = 0;
+    virtual List<T> rest() const = 0;
+};
 
+template<typename T, typename Functor = T(*)()>
+class ListLinkImpl : public ListLink<T>
+{
 protected:
     typedef Thunk<T, Functor> Data;
 
     Data content_;
-    Ptr next_;
-    Ptr self_;
+    List<T> rest_;
+    List<T> self_;
 
 public:
-    LinkedList(Data content, Ptr next) :
+    ListLinkImpl(Data content, List<T> rest) :
         content_(content),
-        next_(next),
+        rest_(rest),
         self_()
     {
     }
     
-    LinkedList(Data content) :
+    ListLinkImpl(Data content) :
         content_(content),
-        next_(),
+        rest_(),
         self_()
     {
     }
 
-    const T value()
+    const T first()
     {
         return content_();
     }
 
-    Ptr next() const
+    List<T> rest() const
     {
-        return next_;
+        return rest_;
     }
 
-    Ptr operator&()
+    List<T> operator&()
     {
         if (self_.get() == 0)
         {
-            LinkedList *self = new LinkedList(*this);
+            ListLinkImpl *self = new ListLinkImpl(*this);
             self->self_ = self_;
             self_.reset(self);
         }
@@ -68,16 +71,15 @@ public:
 };
 
 template<typename T, typename Functor>
-LinkedList<T, Functor> makeList(const Functor code)
+List<T> makeList(const Functor code)
 {
-    return LinkedList<T, Functor>(code);
+    return &ListLinkImpl<T, Functor>(code);
 }
 
 template<typename T, typename Functor>
-LinkedList<T, Functor> makeList(const Functor code,
-                                const typename AbstractList<T>::Ptr next)
+List<T> makeList(const Functor code, const List<T> rest)
 {
-    return LinkedList<T, Functor>(code, next);
+    return &ListLinkImpl<T, Functor>(code, rest);
 }
 
 }
