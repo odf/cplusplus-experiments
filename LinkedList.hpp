@@ -1,7 +1,6 @@
 #ifndef ODF_LINKEDLIST_HPP
 #define ODF_LINKEDLIST_HPP 1
 
-#include <iostream>
 #include <tr1/memory>
 #include "Thunk.hpp"
 
@@ -9,15 +8,15 @@ namespace odf
 {
 
 template<typename T>
-class ListLink;
+class AbstractListLink;
 
 template<typename T>
-class List : public std::tr1::shared_ptr<ListLink<T> >
+class List : public std::tr1::shared_ptr<AbstractListLink<T> >
 {
 };
 
 template<typename T>
-class ListLink
+class AbstractListLink
 {
 public:
     virtual const T first() = 0;
@@ -25,7 +24,7 @@ public:
 };
 
 template<typename T, typename Functor = T(*)()>
-class ListLinkImpl : public ListLink<T>
+class ListLink : public AbstractListLink<T>
 {
 protected:
     typedef Thunk<T, Functor> Data;
@@ -35,23 +34,18 @@ protected:
     List<T> self_;
 
 public:
-    ListLinkImpl(Data content, List<T> rest) :
+    ListLink(Data content, List<T> rest) :
         content_(content),
         rest_(rest),
         self_()
     {
     }
     
-    ListLinkImpl(Data content) :
+    ListLink(Data content) :
         content_(content),
         rest_(),
         self_()
     {
-    }
-
-    ~ListLinkImpl()
-    {
-        std::cout << "Releasing list link with thunk " << content_ << std::endl;
     }
 
     const T first()
@@ -68,7 +62,7 @@ public:
     {
         if (self_.get() == 0)
         {
-            ListLinkImpl *self = new ListLinkImpl(*this);
+            ListLink *self = new ListLink(*this);
             self->self_ = self_;
             self_.reset(self);
         }
@@ -79,13 +73,13 @@ public:
 template<typename T, typename Functor>
 List<T> makeList(const Functor code)
 {
-    return &ListLinkImpl<T, Functor>(code);
+    return &ListLink<T, Functor>(code);
 }
 
 template<typename T, typename Functor>
 List<T> makeList(const Functor code, const List<T> rest)
 {
-    return &ListLinkImpl<T, Functor>(code, rest);
+    return &ListLink<T, Functor>(code, rest);
 }
 
 }
