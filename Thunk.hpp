@@ -71,7 +71,7 @@ public:
     }
 };
 
-template<typename T, typename Functor>
+template<typename T, typename Functor = T(*)()>
 class Thunk
 {
 private:
@@ -80,6 +80,11 @@ private:
     Ptr content_;
 
 public:
+    Thunk() :
+        content_()
+    {
+    }
+
     Thunk(const Functor code) :
         content_(Ptr(new ThunkImpl<T, Functor>(code)))
     {
