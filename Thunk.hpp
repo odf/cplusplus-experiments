@@ -79,29 +79,13 @@ public:
 };
 
 template<typename T>
-class ThunkPtr : public std::tr1::shared_ptr<AbstractThunkImpl<T> >
-{
-private:
-    typename std::tr1::shared_ptr<AbstractThunkImpl<T> > typedef Base;
-public:
-    ThunkPtr() :
-        Base()
-    {
-    }
-
-    ThunkPtr(AbstractThunkImpl<T>* thunk) :
-        Base(thunk)
-    {
-    }
-};
-
-template<typename T>
 class Thunk
 {
 private:
+    typename std::tr1::shared_ptr<AbstractThunkImpl<T> > typedef ThunkPtr;
     typedef T(*FunPtr)();
 
-    ThunkPtr<T> content_;
+    ThunkPtr content_;
 
 public:
     Thunk() :
@@ -109,18 +93,18 @@ public:
     {
     }
 
-    Thunk(ThunkPtr<T> code) :
+    Thunk(ThunkPtr code) :
         content_(code)
     {
     }
 
     Thunk(FunPtr code) :
-        content_(ThunkPtr<T>(new ThunkImpl<T, FunPtr>(code)))
+        content_(ThunkPtr(new ThunkImpl<T, FunPtr>(code)))
     {
     }
 
     Thunk(T value) :
-        content_(ThunkPtr<T>(new ThunkImpl<T, FunPtr>(value)))
+        content_(ThunkPtr(new ThunkImpl<T, FunPtr>(value)))
     {
     }
 
@@ -133,7 +117,8 @@ public:
 template<typename T, typename Functor>
 Thunk<T> makeThunk(const Functor code)
 {
-    return Thunk<T>(ThunkPtr<T>(new ThunkImpl<T, Functor>(code)));
+    return Thunk<T>(std::tr1::shared_ptr<AbstractThunkImpl<T> >(
+                        new ThunkImpl<T, Functor>(code)));
 }
 
 }
