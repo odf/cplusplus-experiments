@@ -10,23 +10,9 @@ namespace odf
 #ifdef DEBUG
 std::ostream& log = std::cout;
 #else
-struct nullstream
-{
-};
+#include "nullstream.hpp"
 
-template<typename T>
-nullstream& operator<<(nullstream& ns, T)
-{
-    return ns;
-}
-
-inline nullstream& operator<<(nullstream& ns,
-                              std::ostream& (*)(std::ostream&))
-{
-    return ns;
-}
-
-nullstream log;
+odf::nullstream log;
 #endif
 
 
