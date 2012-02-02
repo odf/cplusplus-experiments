@@ -31,7 +31,7 @@ public:
         return (*this)().first();
     }
 
-    List<T> rest()
+    List rest()
     {
         return (*this)().rest();
     }

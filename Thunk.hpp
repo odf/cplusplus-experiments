@@ -16,8 +16,15 @@ odf::nullstream log;
 #endif
 
 
+template<typename T>
+class AbstractThunkImpl
+{
+public:
+    virtual T operator() () = 0;
+};
+
 template<typename T, typename Functor>
-class ThunkImpl
+class ThunkImpl : public AbstractThunkImpl<T>
 {
 private:
     bool pending_;
@@ -71,13 +78,30 @@ public:
     }
 };
 
-template<typename T, typename Functor = T(*)()>
+template<typename T>
+class ThunkPtr : public std::tr1::shared_ptr<AbstractThunkImpl<T> >
+{
+private:
+    typename std::tr1::shared_ptr<AbstractThunkImpl<T> > typedef Base;
+public:
+    ThunkPtr() :
+        Base()
+    {
+    }
+
+    ThunkPtr(AbstractThunkImpl<T>* thunk) :
+        Base(thunk)
+    {
+    }
+};
+
+template<typename T>
 class Thunk
 {
 private:
-    typename std::tr1::shared_ptr<ThunkImpl<T, Functor> > typedef Ptr;
+    typedef T(*FunPtr)();
 
-    Ptr content_;
+    ThunkPtr<T> content_;
 
 public:
     Thunk() :
@@ -85,13 +109,18 @@ public:
     {
     }
 
-    Thunk(const Functor code) :
-        content_(Ptr(new ThunkImpl<T, Functor>(code)))
+    Thunk(ThunkPtr<T> code) :
+        content_(code)
+    {
+    }
+
+    Thunk(FunPtr code) :
+        content_(ThunkPtr<T>(new ThunkImpl<T, FunPtr>(code)))
     {
     }
 
     Thunk(T value) :
-        content_(Ptr(new ThunkImpl<T, Functor>(value)))
+        content_(ThunkPtr<T>(new ThunkImpl<T, FunPtr>(value)))
     {
     }
 
@@ -102,9 +131,9 @@ public:
 };
 
 template<typename T, typename Functor>
-Thunk<T, Functor> makeThunk(const Functor code)
+Thunk<T> makeThunk(const Functor code)
 {
-    return Thunk<T, Functor>(code);
+    return Thunk<T>(ThunkPtr<T>(new ThunkImpl<T, Functor>(code)));
 }
 
 }
