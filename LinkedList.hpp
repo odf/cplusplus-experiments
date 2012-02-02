@@ -22,12 +22,6 @@ public:
     {
     }
 
-    List(T first, List rest) :
-        Ptr(rest),
-        first_(first)
-    {
-    }
-    
     List(T first, Ptr thunk) :
         Ptr(thunk),
         first_(first)
