@@ -112,6 +112,11 @@ public:
     {
         return content_->operator()();
     }
+
+    bool isEmpty()
+    {
+        return content_.get() == 0;
+    }
 };
 
 template<typename T, typename Functor>
