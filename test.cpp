@@ -31,10 +31,6 @@ int main()
     List<int> three = cons(3, cons(2, cons(1)));
     List<int> four  = cons(4, three.rest());
 
-    std::cout << three.first() << " "
-              << three.rest().first() << " "
-              << three.rest().rest().first() << std::endl;
-    std::cout << four.first() << " "
-              << four.rest().first() << " "
-              << four.rest().rest().first() << std::endl;
+    std::cout << three << std::endl;
+    std::cout << four << std::endl;
 }
