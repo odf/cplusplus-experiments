@@ -29,7 +29,7 @@ constant_functor<T> constant(const T val)
 int main()
 {
     List<int> three = cons(3, cons(2, cons(1)));
-    List<int> four  = cons(4, three.rest());
+    List<int> four  = cons(4, constant(three.rest()));
 
     std::cout << three << std::endl;
     std::cout << four << std::endl;

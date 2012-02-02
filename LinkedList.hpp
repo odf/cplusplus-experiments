@@ -16,8 +16,20 @@ private:
     T first_;
 
 public:
-    List(T first, List<T> rest) :
+    List() :
+        Ptr(),
+        first_()
+    {
+    }
+
+    List(T first, List rest) :
         Ptr(rest),
+        first_(first)
+    {
+    }
+    
+    List(T first, Ptr thunk) :
+        Ptr(thunk),
         first_(first)
     {
     }
@@ -60,6 +72,12 @@ template<typename T>
 List<T> cons(const T first, const List<T> rest)
 {
     return List<T>(first, rest);
+}
+
+template<typename T, typename Functor>
+List<T> cons(const T first, const Functor code)
+{
+    return List<T>(first, makeThunk<List<T> >(code));
 }
 
 template<typename T>
