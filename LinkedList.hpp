@@ -8,7 +8,7 @@ namespace odf
 {
 
 template<typename T>
-class List : public Thunk<List<T> >
+class List : Thunk<List<T> >
 {
 private:
     typedef Thunk<List<T> > Ptr;
@@ -20,6 +20,7 @@ public:
         Ptr(),
         first_()
     {
+        //TODO make the empty list recognisable
     }
 
     List(T first, Ptr thunk) :
@@ -48,10 +49,11 @@ public:
     {
         if (atEnd())
         {
+            return List();
         }
         else
         {
-            return this->operator()();
+            return Ptr::operator()();
         }
     }
 };
