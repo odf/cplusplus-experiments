@@ -10,17 +10,19 @@ template<typename T>
 class List : public Thunk<List<T> >
 {
 private:
+    typedef Thunk<List<T> > Ptr;
+
     T first_;
 
 public:
     List(T first, List<T> rest) :
-        Thunk<List<T> >(rest),
+        Ptr(rest),
         first_(first)
     {
     }
     
     List(T first) :
-        Thunk<List<T> >(),
+        Ptr(),
         first_(first)
     {
     }
@@ -29,10 +31,21 @@ public:
     {
         return first_;
     }
+    
+    bool atEnd()
+    {
+        return Ptr::isEmpty();
+    }
 
     List rest()
     {
-        return this->operator()();
+        if (atEnd())
+        {
+        }
+        else
+        {
+            return this->operator()();
+        }
     }
 };
 
