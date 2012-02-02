@@ -7,57 +7,22 @@ namespace odf
 {
 
 template<typename T>
-class ListLink;
-
-template<typename T>
-class List : public Thunk<ListLink<T> >
+class List : public Thunk<List<T> >
 {
 private:
-    typedef ListLink<T> Link;
-
-public:
-    List() :
-        Thunk<Link>()
-    {
-    }
-
-    List(Link link) :
-        Thunk<Link>(link)
-    {
-    }
-
-    const T first()
-    {
-        return (*this)().first();
-    }
-
-    List rest()
-    {
-        return (*this)().rest();
-    }
-};
-
-template<typename T>
-class ListLink
-{
-protected:
     T first_;
-    List<T> rest_;
-    List<T> self_;
 
 public:
-    ListLink(T first, List<T> rest) :
-        first_(first),
-        rest_(rest)
+    List(T first, List<T> rest) :
+        Thunk<List<T> >(rest),
+        first_(first)
     {
-        self_ = List<T>(*this);
     }
     
-    ListLink(T first) :
-        first_(first),
-        rest_()
+    List(T first) :
+        Thunk<List<T> >(),
+        first_(first)
     {
-        self_ = List<T>(*this);
     }
 
     const T first()
@@ -65,27 +30,22 @@ public:
         return first_;
     }
 
-    List<T> rest()
+    List rest()
     {
-        return rest_;
-    }
-
-    List<T> operator&()
-    {
-        return self_;
+        return this->operator()();
     }
 };
 
 template<typename T>
 List<T> cons(const T first)
 {
-    return &ListLink<T>(first);
+    return List<T>(first);
 }
 
 template<typename T>
 List<T> cons(const T first, const List<T> rest)
 {
-    return &ListLink<T>(first, rest);
+    return List<T>(first, rest);
 }
 
 }

@@ -3,17 +3,38 @@
 
 using namespace odf;
 
+template<typename T>
+struct constant_functor
+{
+    T val_;
+
+    constant_functor(T val)
+    {
+        val_ = val;
+    }
+
+    T operator() ()
+    {
+        std::cout << "evaluating constant " << val_ << std::endl;
+        return val_;
+    }
+};
+
+template<typename T>
+constant_functor<T> constant(const T val)
+{
+    return constant_functor<T>(val);
+}
+
 int main()
 {
-    List<int> one   = cons<int>(1);
-    List<int> two   = cons<int>(2, one);
-    List<int> three = cons<int>(3, two);
-    List<int> four  = cons<int>(4, two);
+    List<int> three = cons(3, cons(2, cons(1)));
+    List<int> four  = cons(4, three.rest());
 
-    std::cout << three().first() << " "
-              << three().rest().first() << " "
-              << three().rest().rest().first() << std::endl;
-    std::cout << four().first() << " "
-              << four().rest().first() << " "
-              << four().rest().rest().first() << std::endl;
+    std::cout << three.first() << " "
+              << three.rest().first() << " "
+              << three.rest().rest().first() << std::endl;
+    std::cout << four.first() << " "
+              << four.rest().first() << " "
+              << four.rest().rest().first() << std::endl;
 }
