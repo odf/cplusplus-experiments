@@ -8,7 +8,8 @@ using namespace std;
 using namespace boost::lambda;
 using namespace odf;
 
-void print(int val, string pre, string post)
+template<typename T>
+void print(T val, string pre, string post)
 {
     cout << pre << val << post;
 }
@@ -21,5 +22,8 @@ int main()
     cout << three << endl;
     cout << four << endl;
 
-    forEach(three, bind(print, _1, "<", "> "));
+    forEach(three, bind(print<int>, _1, "<", "> "));
+    cout << endl;
+
+    cout << mapList(four, _1 * 2) << endl;
 }
