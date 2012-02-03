@@ -1,24 +1,25 @@
 #include <iostream>
 #include <string>
-#include <boost/spirit/include/phoenix.hpp>
+#include <boost/lambda/lambda.hpp>
+#include <boost/lambda/bind.hpp>
 #include "list_fun.hpp"
 
+using namespace std;
+using namespace boost::lambda;
 using namespace odf;
-using namespace boost::phoenix;
-using namespace boost::phoenix::arg_names;
 
-void print(int val, std::string pre, std::string post)
+void print(int val, string pre, string post)
 {
-    std::cout << pre << val << post;
+    cout << pre << val << post;
 }
 
 int main()
 {
     List<int> three = cons(3, cons(2, cons(1)));
-    List<int> four  = cons(4, val(three.rest()));
+    List<int> four  = cons(4, constant(three.rest()));
 
-    std::cout << three << std::endl;
-    std::cout << four << std::endl;
+    cout << three << endl;
+    cout << four << endl;
 
-    forEach(three, bind(print, arg1, "<", "> "));
+    forEach(three, bind(print, _1, "<", "> "));
 }
