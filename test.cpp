@@ -29,5 +29,5 @@ int main()
 
     cout << filterList(three, _1 % 2 == 1) << endl;
 
-    cout << (three + four) << endl;
+    cout << zipLists(three, four, _1 - _2) << endl;
 }

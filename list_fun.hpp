@@ -115,18 +115,6 @@ List<T> zipLists(const List<T> lft, const List<T> rgt, const F fun)
     }
 }
 
-template<typename T>
-T add(T lft, T rgt)
-{
-    return lft + rgt;
-}
-
-template<typename T>
-const List<T> List<T>::operator+(const List<T> other) const
-{
-    return zipLists(*this, other, add<T>);
-}
-
 template<typename T, typename F>
 List<T> filterList(const List<T> src, const F pred)
 {
