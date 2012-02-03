@@ -23,18 +23,17 @@ List<T> cons(const T first, const Functor code)
 }
 
 template<typename T, typename Functor>
-void forEach(List<T> list, const Functor f)
+void forEach(const List<T> list, const Functor f)
 {
     List<T> p = list;
     while (!p.isEmpty()) {
-        T val = p.first();
-        f(val);
+        f(p.first());
         p = p.rest();
     }
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, List<T> list)
+std::ostream& operator<<(std::ostream& out, const List<T> list)
 {
     if (!list.isEmpty()) {
         out << list.first();

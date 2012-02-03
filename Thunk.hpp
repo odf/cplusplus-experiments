@@ -20,32 +20,34 @@ template<typename T>
 class AbstractThunkImpl
 {
 public:
-    virtual T operator() () = 0;
+    virtual const T operator() () = 0;
 };
 
 template<typename T, typename Functor>
 class ThunkImpl : public AbstractThunkImpl<T>
 {
 private:
+    const Functor code_;
     bool pending_;
-    Functor code_;
     T value_;
 
 public:
     ThunkImpl() :
+        code_(),
         pending_(false)
     {
         log << "Making empty ThunkImpl   => " << this << std::endl;
     }
 
     ThunkImpl(const Functor code) :
-        pending_(true),
-        code_(code)
+        code_(code),
+        pending_(true)
     {
         log << "Making delayed ThunkImpl => " << this << std::endl;
     }
 
-    ThunkImpl(T value) :
+    ThunkImpl(const T value) :
+        code_(),
         pending_(false),
         value_(value)
     {
@@ -53,8 +55,8 @@ public:
     }
 
     ThunkImpl(const ThunkImpl& other) :
-        pending_(other.pending_),
         code_(other.code_),
+        pending_(other.pending_),
         value_(other.value_)
     {
         log << "  Copying ThunkImpl " << other << "  => "
@@ -66,7 +68,7 @@ public:
         log << "  Destroying ThunkImpl      " << this << std::endl;
     }
 
-    T operator() ()
+    const T operator() ()
     {
         if (pending_)
         {
@@ -93,27 +95,27 @@ public:
     {
     }
 
-    Thunk(ThunkPtr code) :
+    Thunk(const ThunkPtr code) :
         content_(code)
     {
     }
 
-    Thunk(FunPtr code) :
+    Thunk(const FunPtr code) :
         content_(ThunkPtr(new ThunkImpl<T, FunPtr>(code)))
     {
     }
 
-    Thunk(T value) :
+    Thunk(const T value) :
         content_(ThunkPtr(new ThunkImpl<T, FunPtr>(value)))
     {
     }
 
-    T operator() ()
+    const T operator() () const
     {
         return content_->operator()();
     }
 
-    bool isEmpty()
+    const bool isEmpty() const
     {
         return content_.get() == 0;
     }

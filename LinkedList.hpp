@@ -23,31 +23,31 @@ public:
     {
     }
 
-    List(T first, Ptr thunk) :
+    List(const T first, const Ptr thunk) :
         Ptr(thunk),
         is_empty_(false),
         first_(first)
     {
     }
     
-    List(T first) :
+    List(const T first) :
         Ptr(),
         is_empty_(false),
         first_(first)
     {
     }
 
-    const T first()
+    const T first() const
     {
         return first_;
     }
     
-    bool isEmpty()
+    const bool isEmpty() const
     {
         return is_empty_;
     }
 
-    List rest()
+    const List rest() const
     {
         if (Ptr::isEmpty())
         {
