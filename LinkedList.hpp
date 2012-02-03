@@ -13,24 +13,27 @@ class List : Thunk<List<T> >
 private:
     typedef Thunk<List<T> > Ptr;
 
+    bool is_empty_;
     T first_;
 
 public:
     List() :
         Ptr(),
+        is_empty_(true),
         first_()
     {
-        //TODO make the empty list recognisable
     }
 
     List(T first, Ptr thunk) :
         Ptr(thunk),
+        is_empty_(false),
         first_(first)
     {
     }
     
     List(T first) :
         Ptr(),
+        is_empty_(false),
         first_(first)
     {
     }
@@ -40,14 +43,14 @@ public:
         return first_;
     }
     
-    bool atEnd()
+    bool isEmpty()
     {
-        return Ptr::isEmpty();
+        return is_empty_;
     }
 
     List rest()
     {
-        if (atEnd())
+        if (Ptr::isEmpty())
         {
             return List();
         }
@@ -79,10 +82,12 @@ List<T> cons(const T first, const Functor code)
 template<typename T>
 std::ostream& operator<<(std::ostream& out, List<T> list)
 {
-    out << list.first();
-    for (List<T> p = list; !p.atEnd(); p = p.rest())
-    {
-        out << " " << p.rest().first();
+    if (!list.isEmpty()) {
+        out << list.first();
+        for (List<T> p = list.rest(); !p.isEmpty(); p = p.rest())
+        {
+            out << " " << p.first();
+        }
     }
     return out;
 }
