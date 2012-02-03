@@ -4,8 +4,6 @@
 #include <iostream>
 #include "LinkedList.hpp"
 
-using namespace boost::lambda;
-
 namespace odf
 {
 
