@@ -70,6 +70,46 @@ List<T> mapList(const List<T> source, const Functor f)
     }
 }
 
+template<typename T, typename Functor>
+List<T> filterList(const List<T> source, const Functor predicate);
+
+template<typename T, typename Functor>
+struct filterRest
+{
+    filterRest(const List<T> source, const Functor f) :
+        source_(source),
+        f_(f)
+    {
+    }
+
+    const List<T> operator() () const
+    {
+        return filterList(source_.rest(), f_);
+    }
+private:
+    const List<T> source_;
+    const Functor f_;
+};
+
+template<typename T, typename Functor>
+List<T> filterList(const List<T> source, const Functor predicate)
+{
+    List<T> p = source;
+    while (not (p.isEmpty() or predicate(p.first())))
+    {
+        p = p.rest();
+    }
+
+    if (p.isEmpty())
+    {
+        return p;
+    }
+    else
+    {
+        return cons(p.first(), filterRest<T, Functor>(p, predicate));
+    }
+}
+
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const List<T> list)
 {
