@@ -28,4 +28,6 @@ int main()
     cout << mapList(four, _1 * 2) << endl;
 
     cout << filterList(three, _1 % 2 == 1) << endl;
+
+    cout << (three + four) << endl;
 }

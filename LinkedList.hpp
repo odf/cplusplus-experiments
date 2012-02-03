@@ -58,6 +58,8 @@ public:
             return Ptr::operator()();
         }
     }
+
+    const List<T> operator+(const List<T> other) const;
 };
 
 }
