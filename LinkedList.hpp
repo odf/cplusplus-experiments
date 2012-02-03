@@ -60,4 +60,6 @@ public:
     }
 };
 
+}
+
 #endif // !ODF_LINKEDLIST_HPP
