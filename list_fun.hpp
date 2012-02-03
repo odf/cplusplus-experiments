@@ -10,25 +10,25 @@ namespace odf
 {
 
 template<typename T>
-List<T> cons(const T first)
+inline List<T> cons(const T first)
 {
     return List<T>(first);
 }
 
 template<typename T>
-List<T> cons(const T first, const List<T> rest)
+inline List<T> cons(const T first, const List<T> rest)
 {
     return List<T>(first, rest);
 }
 
 template<typename T, typename Functor>
-List<T> cons(const T first, const Functor code)
+inline List<T> cons(const T first, const Functor code)
 {
     return List<T>(first, makeThunk<List<T> >(code));
 }
 
 template<typename T, typename Functor>
-void forEach(const List<T> list, const Functor f)
+inline void forEach(const List<T> list, const Functor f)
 {
     for (List<T> p = list; !p.isEmpty(); p = p.rest())
     {
@@ -36,49 +36,48 @@ void forEach(const List<T> list, const Functor f)
     }
 }
 
-template<typename Functor, typename ListT, typename ArgT>
-struct bindRest
+template<typename F, typename L, typename A>
+struct binder
 {
-    bindRest(const Functor fun, const ListT src, const ArgT arg) :
+    binder(const F fun, const L src, const A arg) :
         fun(fun), src(src), arg(arg)
     {
     }
 
-    const ListT operator() () const
+    const L operator() () const
     {
         return fun(src.rest(), arg);
     }
 
 private:
-    const Functor fun;
-    const ListT   src;
-    const ArgT    arg;
+    const F fun;
+    const L src;
+    const A arg;
 };
 
-
-template<typename T, typename Functor>
-List<T> mapList(const List<T> source, const Functor f)
+template<typename F, typename L, typename A>
+inline struct binder<F, L, A> bindRest(const F fun, const L src, const A arg)
 {
-    typedef List<T> (*FunPtr)(const List<T>, const Functor);
-    typedef bindRest<FunPtr, List<T>, Functor> binder;
+    return binder<F, L, A>(fun, src, arg);
+}
 
-    if (source.isEmpty())
+template<typename T, typename F>
+List<T> mapList(const List<T> src, const F fun)
+{
+    if (src.isEmpty())
     {
-        return source;
+        return src;
     }
     else
     {
-        return cons(f(source.first()), binder(mapList, source, f));
+        return cons(fun(src.first()), bindRest(mapList<T, F>, src, fun));
     }
 }
 
-template<typename T, typename Functor>
-List<T> filterList(const List<T> source, const Functor pred)
+template<typename T, typename F>
+List<T> filterList(const List<T> src, const F pred)
 {
-    typedef List<T> (*FunPtr)(const List<T>, const Functor);
-    typedef bindRest<FunPtr, List<T>, Functor> binder;
-
-    List<T> p = source;
+    List<T> p = src;
     while (not (p.isEmpty() or pred(p.first())))
     {
         p = p.rest();
@@ -90,7 +89,7 @@ List<T> filterList(const List<T> source, const Functor pred)
     }
     else
     {
-        return cons(p.first(), binder(filterList, p, pred));
+        return cons(p.first(), bindRest(filterList<T, F>, p, pred));
     }
 }
 
