@@ -36,66 +36,50 @@ void forEach(const List<T> list, const Functor f)
     }
 }
 
-template<typename T, typename Functor>
-List<T> mapList(const List<T> source, const Functor f);
-
-template<typename T, typename Functor>
-struct mapRest
+template<typename Functor, typename ListT, typename ArgT>
+struct bindRest
 {
-    mapRest(const List<T> source, const Functor f) :
-        source_(source),
-        f_(f)
+    bindRest(const Functor fun, const ListT src, const ArgT arg) :
+        fun(fun), src(src), arg(arg)
     {
     }
 
-    const List<T> operator() () const
+    const ListT operator() () const
     {
-        return mapList(source_.rest(), f_);
+        return fun(src.rest(), arg);
     }
+
 private:
-    const List<T> source_;
-    const Functor f_;
+    const Functor fun;
+    const ListT   src;
+    const ArgT    arg;
 };
+
 
 template<typename T, typename Functor>
 List<T> mapList(const List<T> source, const Functor f)
 {
+    typedef List<T> (*FunPtr)(const List<T>, const Functor);
+    typedef bindRest<FunPtr, List<T>, Functor> binder;
+
     if (source.isEmpty())
     {
         return source;
     }
     else
     {
-        return cons(f(source.first()), mapRest<T, Functor>(source, f));
+        return cons(f(source.first()), binder(mapList, source, f));
     }
 }
 
 template<typename T, typename Functor>
-List<T> filterList(const List<T> source, const Functor predicate);
-
-template<typename T, typename Functor>
-struct filterRest
+List<T> filterList(const List<T> source, const Functor pred)
 {
-    filterRest(const List<T> source, const Functor f) :
-        source_(source),
-        f_(f)
-    {
-    }
+    typedef List<T> (*FunPtr)(const List<T>, const Functor);
+    typedef bindRest<FunPtr, List<T>, Functor> binder;
 
-    const List<T> operator() () const
-    {
-        return filterList(source_.rest(), f_);
-    }
-private:
-    const List<T> source_;
-    const Functor f_;
-};
-
-template<typename T, typename Functor>
-List<T> filterList(const List<T> source, const Functor predicate)
-{
     List<T> p = source;
-    while (not (p.isEmpty() or predicate(p.first())))
+    while (not (p.isEmpty() or pred(p.first())))
     {
         p = p.rest();
     }
@@ -106,7 +90,7 @@ List<T> filterList(const List<T> source, const Functor predicate)
     }
     else
     {
-        return cons(p.first(), filterRest<T, Functor>(p, predicate));
+        return cons(p.first(), binder(filterList, p, pred));
     }
 }
 
