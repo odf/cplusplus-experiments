@@ -25,10 +25,9 @@ List<T> cons(const T first, const Functor code)
 template<typename T, typename Functor>
 void forEach(const List<T> list, const Functor f)
 {
-    List<T> p = list;
-    while (!p.isEmpty()) {
+    for (List<T> p = list; !p.isEmpty(); p = p.rest())
+    {
         f(p.first());
-        p = p.rest();
     }
 }
 
