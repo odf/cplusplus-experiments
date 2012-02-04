@@ -62,19 +62,19 @@ bindRest(const F fun, const L lft, const L rgt, const A arg)
 
 
 template<typename T>
-inline List<T> cons(const T first)
+inline List<T> makeList(const T first)
 {
     return List<T>(first);
 }
 
 template<typename T>
-inline List<T> cons(const T first, const List<T> rest)
+inline List<T> makeList(const T first, const List<T> rest)
 {
     return List<T>(first, rest);
 }
 
 template<typename T, typename Functor>
-inline List<T> cons(const T first, const Functor code)
+inline List<T> makeList(const T first, const Functor code)
 {
     return List<T>(first, makeThunk<List<T> >(code));
 }
@@ -97,7 +97,7 @@ List<T> mapList(const List<T> src, const F fun)
     }
     else
     {
-        return cons(fun(src.first()), bindRest(mapList<T, F>, src, fun));
+        return makeList(fun(src.first()), bindRest(mapList<T, F>, src, fun));
     }
 }
 
@@ -110,8 +110,8 @@ List<T> zipLists(const List<T> lft, const List<T> rgt, const F fun)
     }
     else
     {
-        return cons(fun(lft.first(), rgt.first()),
-                    bindRest(zipLists<T, F>, lft, rgt, fun));
+        return makeList(fun(lft.first(), rgt.first()),
+                        bindRest(zipLists<T, F>, lft, rgt, fun));
     }
 }
 
@@ -130,7 +130,7 @@ List<T> filterList(const List<T> src, const F pred)
     }
     else
     {
-        return cons(p.first(), bindRest(filterList<T, F>, p, pred));
+        return makeList(p.first(), bindRest(filterList<T, F>, p, pred));
     }
 }
 

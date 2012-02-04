@@ -16,8 +16,8 @@ void print(T val, string pre, string post)
 
 int main()
 {
-    List<int> three = cons(3, cons(2, cons(1)));
-    List<int> four  = cons(4, constant(three.rest()));
+    List<int> three = makeList(3, makeList(2, makeList(1)));
+    List<int> four  = makeList(4, constant(three.rest()));
 
     cout << three << endl;
     cout << four << endl;
