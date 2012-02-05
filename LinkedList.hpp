@@ -7,31 +7,32 @@ namespace odf
 {
 
 template<typename T>
-class List : Thunk<List<T> >
+class List
 {
 private:
     typedef Thunk<List<T> > Ptr;
 
+    Ptr next_;
     bool is_empty_;
     T first_;
 
 public:
     List() :
-        Ptr(),
+        next_(),
         is_empty_(true),
         first_()
     {
     }
 
-    List(const T first, const Ptr thunk) :
-        Ptr(thunk),
+    List(const T first, const Ptr next) :
+        next_(next),
         is_empty_(false),
         first_(first)
     {
     }
     
     List(const T first) :
-        Ptr(),
+        next_(),
         is_empty_(false),
         first_(first)
     {
@@ -49,13 +50,13 @@ public:
 
     const List rest() const
     {
-        if (Ptr::isEmpty())
+        if (next_.isEmpty())
         {
             return List();
         }
         else
         {
-            return Ptr::operator()();
+            return next_();
         }
     }
 };
