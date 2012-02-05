@@ -15,6 +15,29 @@ void print(T val, string pre, string post)
     cout << pre << val << post;
 }
 
+template<typename L>
+struct fibBinder
+{
+    fibBinder(const L& list) :
+        list(list)
+    {
+    }
+
+    const L operator() () const
+    {
+        return list + list.rest();
+    }
+
+private:
+    const L& list;
+};
+
+template<typename L>
+inline struct fibBinder<L> bindFib(const L& list)
+{
+    return fibBinder<L>(list);
+}
+
 int main()
 {
     List<int> three = makeList(3, makeList(2, makeList(1)));
@@ -30,5 +53,15 @@ int main()
 
     cout << filterList(three, _1 % 2 == 1) << endl;
 
-    cout << zipLists(three, four, _1 - _2) << endl;
+    cout << three + four << endl;
+
+    cout << three - four.rest() * three << endl;
+
+    List<int> fib = makeList(0, makeList(1, bindFib(fib)));
+    List<int> p;
+    int i;
+    for (i = 0, p = fib; i < 10; ++i, p = p.rest()) {
+        cout << " " << p.first();
+    }
+    cout << endl;
 }

@@ -1,6 +1,7 @@
 #ifndef ODF_LIST_FUN_HPP
 #define ODF_LIST_FUN_HPP 1
 
+#include <functional>
 
 namespace odf
 {
@@ -93,6 +94,30 @@ L zipLists(const L lft, const L rgt, const F fun)
         return makeList(fun(lft.first(), rgt.first()),
                         bindRest(zipLists<L, F>, lft, rgt, fun));
     }
+}
+
+template<typename L>
+L operator+(const L lft, const L rgt)
+{
+    return zipLists(lft, rgt, std::plus<typename L::element_type>());
+}
+
+template<typename L>
+L operator-(const L lft, const L rgt)
+{
+    return zipLists(lft, rgt, std::minus<typename L::element_type>());
+}
+
+template<typename L>
+L operator*(const L lft, const L rgt)
+{
+    return zipLists(lft, rgt, std::multiplies<typename L::element_type>());
+}
+
+template<typename L>
+L operator/(const L lft, const L rgt)
+{
+    return zipLists(lft, rgt, std::divides<typename L::element_type>());
 }
 
 template<typename L, typename F>

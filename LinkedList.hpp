@@ -17,6 +17,8 @@ private:
     T first_;
 
 public:
+    typedef T element_type;
+
     List() :
         next_(),
         is_empty_(true),
