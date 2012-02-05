@@ -139,6 +139,33 @@ L filterList(const L src, const F pred)
     }
 }
 
+template<typename L>
+L takeList(const L list, const int n)
+{
+    if (list.isEmpty() or n <= 0)
+    {
+        return L();
+    }
+    else
+    {
+        return makeList(list.first(), bindRest(takeList<L>, list, n-1));
+    }
+}
+
+template<typename L>
+L dropList(const L list, const int n)
+{
+    L p = list;
+    int i = n;
+    while (not (p.isEmpty() or i <= 0))
+    {
+        --i;
+        p = p.rest();
+    }
+
+    return p;
+}
+
 }
 
 #endif // !ODF_LIST_FUN_HPP

@@ -58,10 +58,6 @@ int main()
     cout << three - four.rest() * three << endl;
 
     List<int> fib = makeList(0, makeList(1, bindFib(fib)));
-    List<int> p;
-    int i;
-    for (i = 0, p = fib; i < 10; ++i, p = p.rest()) {
-        cout << " " << p.first();
-    }
-    cout << endl;
+    cout << takeList(fib, 10) << endl;
+    cout << takeList(dropList(fib, 10), 10) << endl;
 }
