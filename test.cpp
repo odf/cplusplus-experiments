@@ -2,6 +2,7 @@
 #include <string>
 #include <boost/lambda/lambda.hpp>
 #include <boost/lambda/bind.hpp>
+#include "LinkedList.hpp"
 #include "list_fun.hpp"
 
 using namespace std;

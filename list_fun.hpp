@@ -1,8 +1,6 @@
 #ifndef ODF_LIST_FUN_HPP
 #define ODF_LIST_FUN_HPP 1
 
-#include <iostream>
-#include "LinkedList.hpp"
 
 namespace odf
 {
@@ -61,35 +59,17 @@ bindRest(const F fun, const L lft, const L rgt, const A arg)
 
 
 
-template<typename T>
-inline List<T> makeList(const T first)
+template<typename L, typename Functor>
+inline void forEach(const L list, const Functor f)
 {
-    return List<T>(first);
-}
-
-template<typename T>
-inline List<T> makeList(const T first, const List<T> rest)
-{
-    return List<T>(first, rest);
-}
-
-template<typename T, typename Functor>
-inline List<T> makeList(const T first, const Functor code)
-{
-    return List<T>(first, makeThunk<List<T> >(code));
-}
-
-template<typename T, typename Functor>
-inline void forEach(const List<T> list, const Functor f)
-{
-    for (List<T> p = list; !p.isEmpty(); p = p.rest())
+    for (L p = list; !p.isEmpty(); p = p.rest())
     {
         f(p.first());
     }
 }
 
-template<typename T, typename F>
-List<T> mapList(const List<T> src, const F fun)
+template<typename L, typename F>
+L mapList(const L src, const F fun)
 {
     if (src.isEmpty())
     {
@@ -97,28 +77,28 @@ List<T> mapList(const List<T> src, const F fun)
     }
     else
     {
-        return makeList(fun(src.first()), bindRest(mapList<T, F>, src, fun));
+        return makeList(fun(src.first()), bindRest(mapList<L, F>, src, fun));
     }
 }
 
-template<typename T, typename F>
-List<T> zipLists(const List<T> lft, const List<T> rgt, const F fun)
+template<typename L, typename F>
+L zipLists(const L lft, const L rgt, const F fun)
 {
     if (lft.isEmpty() or rgt.isEmpty())
     {
-        return List<T>();
+        return L();
     }
     else
     {
         return makeList(fun(lft.first(), rgt.first()),
-                        bindRest(zipLists<T, F>, lft, rgt, fun));
+                        bindRest(zipLists<L, F>, lft, rgt, fun));
     }
 }
 
-template<typename T, typename F>
-List<T> filterList(const List<T> src, const F pred)
+template<typename L, typename F>
+L filterList(const L src, const F pred)
 {
-    List<T> p = src;
+    L p = src;
     while (not (p.isEmpty() or pred(p.first())))
     {
         p = p.rest();
@@ -130,22 +110,8 @@ List<T> filterList(const List<T> src, const F pred)
     }
     else
     {
-        return makeList(p.first(), bindRest(filterList<T, F>, p, pred));
+        return makeList(p.first(), bindRest(filterList<L, F>, p, pred));
     }
-}
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const List<T> list)
-{
-    if (!list.isEmpty())
-    {
-        out << list.first();
-        for (List<T> p = list.rest(); !p.isEmpty(); p = p.rest())
-        {
-            out << " " << p.first();
-        }
-    }
-    return out;
 }
 
 }

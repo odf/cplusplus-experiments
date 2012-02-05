@@ -60,6 +60,39 @@ public:
     }
 };
 
+template<typename T>
+inline List<T> makeList(const T first)
+{
+    return List<T>(first);
+}
+
+template<typename T>
+inline List<T> makeList(const T first, const List<T> rest)
+{
+    return List<T>(first, rest);
+}
+
+template<typename T, typename Functor>
+inline List<T> makeList(const T first, const Functor code)
+{
+    return List<T>(first, makeThunk<List<T> >(code));
+}
+
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const List<T> list)
+{
+    if (!list.isEmpty())
+    {
+        out << list.first();
+        for (List<T> p = list.rest(); !p.isEmpty(); p = p.rest())
+        {
+            out << " " << p.first();
+        }
+    }
+    return out;
+}
+
 }
 
 #endif // !ODF_LINKEDLIST_HPP
