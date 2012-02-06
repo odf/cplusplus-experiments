@@ -36,14 +36,14 @@ public:
         code_(),
         pending_(false)
     {
-        log << std::endl << "--Making empty ThunkImpl   " << this << std::endl;
+        log << "--Making empty ThunkImpl   " << this << std::endl;
     }
 
     ThunkImpl(const Functor code) :
         code_(code),
         pending_(true)
     {
-        log << std::endl << "--Making delayed ThunkImpl " << this << std::endl;
+        log << "--Making delayed ThunkImpl " << this << std::endl;
     }
 
     ThunkImpl(const T value) :
@@ -51,7 +51,7 @@ public:
         pending_(false),
         value_(value)
     {
-        log << std::endl << "--Making direct ThunkImpl  " << this << std::endl;
+        log << "--Making direct ThunkImpl  " << this << std::endl;
     }
 
     ThunkImpl(const ThunkImpl& other) :
@@ -59,21 +59,20 @@ public:
         pending_(other.pending_),
         value_(other.value_)
     {
-        log << std::endl << "----Copying ThunkImpl      " << other << "  => "
+        log << "----Copying ThunkImpl      " << other << "  => "
             << this << std::endl;
     }
 
     ~ThunkImpl()
     {
-        log << std::endl << "----Destroying ThunkImpl   " << this << std::endl;
+        log << "----Destroying ThunkImpl   " << this << std::endl;
     }
 
     const T operator() ()
     {
         if (pending_)
         {
-            log << std::endl << "----Forcing ThunkImpl      "
-                << this << std::endl;
+            log << "----Forcing ThunkImpl      " << this << std::endl;
             value_ = code_();
             pending_ = false;
         }
