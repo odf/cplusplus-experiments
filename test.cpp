@@ -57,6 +57,8 @@ int main()
 
     cout << three - four.rest() * three << endl;
 
+    // DISCLAIMER: The following looks nifty, but creates a memory hole due to
+    //             circular references, which shared_ptr can't handle.
     List<int> fib = makeList(0, makeList(1, bindFib(fib)));
     cout << takeList(fib, 10) << endl;
     cout << takeList(dropList(fib, 10), 10) << endl;
