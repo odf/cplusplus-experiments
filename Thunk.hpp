@@ -27,7 +27,9 @@ template<typename T, typename Functor>
 class ThunkImpl : public AbstractThunkImpl<T>
 {
 private:
-    const Functor code_;
+    typename std::tr1::shared_ptr<Functor> typedef FunPtr;
+
+    FunPtr code_;
     bool pending_;
     T value_;
 
@@ -40,7 +42,7 @@ public:
     }
 
     ThunkImpl(const Functor code) :
-        code_(code),
+        code_(FunPtr(new Functor(code))),
         pending_(true)
     {
         log << "--Making delayed ThunkImpl " << this << std::endl;
@@ -73,7 +75,8 @@ public:
         if (pending_)
         {
             log << "----Forcing ThunkImpl      " << this << std::endl;
-            value_ = code_();
+            value_ = (*code_)();
+            code_ = FunPtr();
             pending_ = false;
         }
         return value_;
