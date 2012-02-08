@@ -2,6 +2,7 @@
 #include <string>
 #include <boost/lambda/lambda.hpp>
 #include <boost/lambda/bind.hpp>
+#include "Integer.h"
 #include "LinkedList.hpp"
 #include "list_fun.hpp"
 
@@ -59,9 +60,9 @@ int main()
 
     // DISCLAIMER: The following looks nifty, but creates a small memory hole
     //             due to circular references, which shared_ptr can't handle.
-    List<int> fib = makeList(0, makeList(1, bindFib(fib)));
+    List<Integer> fib = makeList(Integer(0), makeList(Integer(1), bindFib(fib)));
     cout << takeList(fib, 10) << endl;
-    cout << takeList(dropList(fib, 10), 10) << endl;
+    cout << takeList(dropList(fib, 990), 10) << endl;
 
     // List<int> fib = makeList(0, makeList(1, bindFib(fib)));
     // List<int> p = fib;
