@@ -11,7 +11,7 @@ namespace odf
 template<typename T>
 class ListIterator
     : public boost::iterator_facade<ListIterator<T>,
-                                    List<T>,
+                                    const List<T>,
                                     boost::forward_traversal_tag,
                                     T>
 {
@@ -39,7 +39,7 @@ class ListIterator
         return this->list_ == other.list_;
     }
 
-    T dereference() const
+    const T dereference() const
     {
         return list_.first();
     }
