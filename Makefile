@@ -6,4 +6,5 @@ test:	test.o
 
 # DO NOT DELETE
 
-test.o: list_fun.hpp LinkedList.hpp Thunk.hpp nullstream.hpp
+test.o: Integer.h shared_array.hpp LinkedList.hpp Thunk.hpp nullstream.hpp
+test.o: ListIterator.hpp list_fun.hpp

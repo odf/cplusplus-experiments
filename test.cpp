@@ -4,6 +4,7 @@
 #include <boost/lambda/bind.hpp>
 #include "Integer.h"
 #include "LinkedList.hpp"
+#include "ListIterator.hpp"
 #include "list_fun.hpp"
 
 using namespace std;
@@ -48,6 +49,10 @@ int main()
     cout << four << endl;
 
     forEach(three, bind(print<int>, _1, "<", "> "));
+    cout << endl;
+
+    std::for_each(ListIterator<int>(four), ListIterator<int>(),
+                  bind(print<int>, _1, "<", "> "));
     cout << endl;
 
     cout << mapList(four, _1 * 2) << endl;

@@ -61,6 +61,11 @@ public:
             return next_();
         }
     }
+
+    bool operator==(List const& other) const
+    {
+        return first_ == other.first_ and next_ == other.next_;
+    }
 };
 
 template<typename T>

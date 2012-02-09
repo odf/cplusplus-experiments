@@ -122,6 +122,11 @@ public:
     {
         return content_.get() == 0;
     }
+
+    bool operator==(Thunk const& other) const
+    {
+        return content_.get() == other.content_.get();
+    }
 };
 
 template<typename T>
