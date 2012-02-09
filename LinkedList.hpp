@@ -33,7 +33,7 @@ public:
     {
     }
     
-    List(const T first) :
+    explicit List(const T first) :
         next_(),
         is_empty_(false),
         first_(first)
@@ -72,7 +72,7 @@ inline List<T> makeList(const T first)
 template<typename T>
 inline List<T> makeList(const T first, const List<T> rest)
 {
-    return List<T>(first, rest);
+    return List<T>(first, makeExplicitThunk(rest));
 }
 
 template<typename T, typename Functor>

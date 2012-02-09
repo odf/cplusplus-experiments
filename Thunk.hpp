@@ -41,14 +41,14 @@ public:
         log << "--Making empty ThunkImpl   " << this << std::endl;
     }
 
-    ThunkImpl(const Functor code) :
+    explicit ThunkImpl(const Functor code) :
         code_(FunPtr(new Functor(code))),
         pending_(true)
     {
         log << "--Making delayed ThunkImpl " << this << std::endl;
     }
 
-    ThunkImpl(const T value) :
+    explicit ThunkImpl(const T value) :
         code_(),
         pending_(false),
         value_(value)
@@ -103,12 +103,12 @@ public:
     {
     }
 
-    Thunk(const FunPtr code) :
+    explicit Thunk(const FunPtr code) :
         content_(ThunkPtr(new ThunkImpl<T, FunPtr>(code)))
     {
     }
 
-    Thunk(const T value) :
+    explicit Thunk(const T value) :
         content_(ThunkPtr(new ThunkImpl<T, FunPtr>(value)))
     {
     }
@@ -123,6 +123,13 @@ public:
         return content_.get() == 0;
     }
 };
+
+template<typename T>
+Thunk<T> makeExplicitThunk(const T value)
+{
+    return Thunk<T>(std::tr1::shared_ptr<AbstractThunkImpl<T> >(
+                        new ThunkImpl<T, T(*)()>(value)));
+}
 
 template<typename T, typename Functor>
 Thunk<T> makeThunk(const Functor code)
