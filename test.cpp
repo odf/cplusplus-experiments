@@ -33,7 +33,7 @@ List<Integer> fibonacci(const Integer a, const Integer b)
 int main()
 {
     List<int> three = makeList(3, makeList(2, makeList(1)));
-    List<int> four  = makeList(4, three.rest());
+    List<int> four  = makeList(4, (three.*(&List<int>::rest))());
 
     cout << three << endl;
     cout << four << endl;
