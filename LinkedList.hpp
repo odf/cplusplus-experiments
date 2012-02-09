@@ -26,14 +26,14 @@ public:
     {
     }
 
-    List(const T first, const Ptr next) :
+    List(const T& first, const Ptr& next) :
         next_(next),
         is_empty_(false),
         first_(first)
     {
     }
     
-    explicit List(const T first) :
+    explicit List(const T& first) :
         next_(),
         is_empty_(false),
         first_(first)
@@ -62,33 +62,33 @@ public:
         }
     }
 
-    bool operator==(List const& other) const
+    const bool operator==(const List& other) const
     {
         return first_ == other.first_ and next_ == other.next_;
     }
 };
 
 template<typename T>
-inline List<T> makeList(const T first)
+inline List<T> makeList(const T& first)
 {
     return List<T>(first);
 }
 
 template<typename T>
-inline List<T> makeList(const T first, const List<T> rest)
+inline List<T> makeList(const T& first, const List<T>& rest)
 {
     return List<T>(first, makeExplicitThunk(rest));
 }
 
 template<typename T, typename Functor>
-inline List<T> makeList(const T first, const Functor code)
+inline List<T> makeList(const T& first, const Functor& code)
 {
     return List<T>(first, makeThunk<List<T> >(code));
 }
 
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, const List<T> list)
+std::ostream& operator<<(std::ostream& out, const List<T>& list)
 {
     if (!list.isEmpty())
     {

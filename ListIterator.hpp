@@ -21,7 +21,7 @@ class ListIterator
     {
     }
 
-    explicit ListIterator(List<T> list)
+    explicit ListIterator(const List<T>& list)
       : list_(list)
     {
     }
@@ -34,7 +34,7 @@ class ListIterator
         list_ = list_.rest();
     }
 
-    bool equal(ListIterator const& other) const
+    const bool equal(const ListIterator& other) const
     {
         return this->list_ == other.list_;
     }
