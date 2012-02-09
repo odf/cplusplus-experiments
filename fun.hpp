@@ -147,30 +147,6 @@ struct function_traits<ternaryCurrier<F> >
 };
 
 template<typename F>
-inline struct unaryCurrier<F> curry1(
-    const F fun,
-    const typename function_traits<F>::arg1_type arg)
-{
-    return unaryCurrier<F>(fun, arg);
-}
-
-template<typename F>
-inline struct binaryCurrier<F> curry2(
-    const F fun,
-    const typename function_traits<F>::arg1_type arg)
-{
-    return binaryCurrier<F>(fun, arg);
-}
-
-template<typename F>
-inline struct ternaryCurrier<F> curry3(
-    const F fun,
-    const typename function_traits<F>::arg1_type arg)
-{
-    return ternaryCurrier<F>(fun, arg);
-}
-
-template<typename F>
 typename function_traits<F>::currier_type curry(
     const F fun,
     const typename function_traits<F>::arg1_type arg)
