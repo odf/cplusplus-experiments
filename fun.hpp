@@ -13,31 +13,13 @@ struct function_traits<R(*)()>
     typedef R                result_type;
 };
 
-template<typename R, typename P>
-struct function_traits<R(*)(P)>
-{
-    static const std::size_t arity = 1;
-    typedef R                result_type;
-    typedef P                arg1_type;
-};
-
-template<typename R, typename P, typename Q>
-struct function_traits<R(*)(P, Q)>
-{
-    static const std::size_t arity = 2;
-    typedef R                result_type;
-    typedef P                arg1_type;
-    typedef Q                arg2_type;
-};
-
-
 template<typename F>
-struct unaryBinder
+struct unaryCurrier
 {
-    typename function_traits<F>::arg1_type   typedef A;
     typename function_traits<F>::result_type typedef R;
+    typename function_traits<F>::arg1_type   typedef A;
 
-    unaryBinder(const F fun, const A arg) :
+    unaryCurrier(const F fun, const A arg) :
         fun(fun), arg(arg)
     {
     }
@@ -53,51 +35,11 @@ private:
 };
 
 template<typename F>
-inline struct unaryBinder<F> bindFunction(
-    const F fun,
-    const typename function_traits<F>::arg1_type arg)
-{
-    return unaryBinder<F>(fun, arg);
-}
-
-template<typename F>
-struct binaryBinder
-{
-    typename function_traits<F>::arg1_type   typedef A;
-    typename function_traits<F>::arg2_type   typedef B;
-    typename function_traits<F>::result_type typedef R;
-
-    binaryBinder(const F fun, const A arg1, const B arg2) :
-        fun(fun), arg1(arg1), arg2(arg2)
-    {
-    }
-
-    const R operator() () const
-    {
-        return fun(arg1, arg2);
-    }
-
-private:
-    const F fun;
-    const A arg1;
-    const B arg2;
-};
-
-template<typename F>
-inline struct binaryBinder<F> bindFunction(
-    const F fun,
-    const typename function_traits<F>::arg1_type arg1,
-    const typename function_traits<F>::arg2_type arg2)
-{
-    return binaryBinder<F>(fun, arg1, arg2);
-}
-
-template<typename F>
 struct binaryCurrier
 {
+    typename function_traits<F>::result_type typedef R;
     typename function_traits<F>::arg1_type   typedef A;
     typename function_traits<F>::arg2_type   typedef B;
-    typename function_traits<F>::result_type typedef R;
 
     binaryCurrier(const F fun, const A arg1) :
         fun(fun), arg1(arg1)
@@ -115,13 +57,137 @@ private:
 };
 
 template<typename F>
-inline struct binaryCurrier<F> curryFunction(
-    const F fun,
-    const typename function_traits<F>::arg1_type arg1)
+struct ternaryCurrier
 {
-    return binaryCurrier<F>(fun, arg1);
+    typename function_traits<F>::result_type typedef R;
+    typename function_traits<F>::arg1_type   typedef A;
+    typename function_traits<F>::arg2_type   typedef B;
+    typename function_traits<F>::arg3_type   typedef C;
+
+    ternaryCurrier(const F fun, const A arg1) :
+        fun(fun), arg1(arg1)
+    {
+    }
+
+    const R operator() (const B arg2, const C arg3) const
+    {
+        return fun(arg1, arg2, arg3);
+    }
+
+private:
+    const F fun;
+    const A arg1;
+};
+
+template<typename R, typename A>
+struct function_traits<R(*)(A)>
+{
+    static const std::size_t arity = 1;
+
+    typedef struct unaryCurrier<R(*)(A)> currier_type;
+
+    typedef R result_type;
+    typedef A arg1_type;
+};
+
+template<typename R, typename A, typename B>
+struct function_traits<R(*)(A, B)>
+{
+    static const std::size_t arity = 2;
+
+    typedef struct binaryCurrier<R(*)(A, B)> currier_type;
+
+    typedef R result_type;
+    typedef A arg1_type;
+    typedef B arg2_type;
+};
+
+template<typename R, typename A, typename B, typename C>
+struct function_traits<R(*)(A, B, C)>
+{
+    static const std::size_t arity = 3;
+
+    typedef struct binaryCurrier<R(*)(A, B, C)> currier_type;
+
+    typedef R result_type;
+    typedef A arg1_type;
+    typedef B arg2_type;
+    typedef C arg3_type;
+};
+
+template<typename F>
+struct function_traits<unaryCurrier<F> >
+{
+    static const std::size_t arity = 0;
+
+    typename function_traits<F>::result_type typedef result_type;
+};
+
+template<typename F>
+struct function_traits<binaryCurrier<F> >
+{
+    static const std::size_t arity = 1;
+
+    typedef struct unaryCurrier<binaryCurrier<F> > currier_type;
+
+    typename function_traits<F>::result_type typedef result_type;
+    typename function_traits<F>::arg2_type   typedef arg1_type;
+};
+
+template<typename F>
+struct function_traits<ternaryCurrier<F> >
+{
+    static const std::size_t arity = 2;
+
+    typedef struct binaryCurrier<ternaryCurrier<F> > currier_type;
+
+    typename function_traits<F>::result_type typedef result_type;
+    typename function_traits<F>::arg2_type   typedef arg1_type;
+    typename function_traits<F>::arg3_type   typedef arg2_type;
+};
+
+template<typename F>
+inline struct unaryCurrier<F> curry1(
+    const F fun,
+    const typename function_traits<F>::arg1_type arg)
+{
+    return unaryCurrier<F>(fun, arg);
 }
 
+template<typename F>
+inline struct binaryCurrier<F> curry2(
+    const F fun,
+    const typename function_traits<F>::arg1_type arg)
+{
+    return binaryCurrier<F>(fun, arg);
+}
+
+template<typename F>
+inline struct ternaryCurrier<F> curry3(
+    const F fun,
+    const typename function_traits<F>::arg1_type arg)
+{
+    return ternaryCurrier<F>(fun, arg);
+}
+
+template<typename F>
+typename function_traits<F>::currier_type curry(
+    const F fun,
+    const typename function_traits<F>::arg1_type arg)
+{
+    return typename function_traits<F>::currier_type(fun, arg);
+}
+
+template<typename F>
+typename function_traits<
+    typename function_traits<F>::currier_type>::currier_type
+curry2(
+    const F fun,
+    const typename function_traits<F>::arg1_type arg1,
+    const typename function_traits<F>::arg2_type arg2)
+{
+    return curry(curry(fun, arg1), arg2);
+}
 
 }
 

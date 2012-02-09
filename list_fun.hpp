@@ -170,7 +170,7 @@ L dropList(const L list, const int n)
 template<typename T>
 List<T> listFrom(const T start)
 {
-    return makeList(start, bindFunction(listFrom<T>, start + 1));
+    return makeList(start, curry(listFrom<T>, start + 1));
 }
 
 }
