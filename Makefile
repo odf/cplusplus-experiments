@@ -10,4 +10,4 @@ json_spirit_test: json_spirit_test.o
 # DO NOT DELETE
 
 test.o: Integer.h shared_array.hpp LinkedList.hpp Thunk.hpp nullstream.hpp
-test.o: ListIterator.hpp fun.hpp list_fun.hpp
+test.o: fun.hpp list_fun.hpp
