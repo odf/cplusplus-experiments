@@ -1,10 +1,15 @@
 #ifndef ODF_LINKEDLIST_HPP
 #define ODF_LINKEDLIST_HPP 1
 
+#include <boost/iterator/iterator_facade.hpp>
+
 #include "Thunk.hpp"
 
 namespace odf
 {
+
+template<typename T>
+class ListIterator;
 
 template<typename T>
 class List
@@ -66,6 +71,16 @@ public:
     {
         return first_ == other.first_ and next_ == other.next_;
     }
+
+    ListIterator<T> begin() const
+    {
+        return ListIterator<T>(*this);
+    }
+
+    ListIterator<T> end() const
+    {
+        return ListIterator<T>();
+    }
 };
 
 template<typename T>
@@ -100,6 +115,45 @@ std::ostream& operator<<(std::ostream& out, const List<T>& list)
     }
     return out;
 }
+
+template<typename T>
+class ListIterator
+    : public boost::iterator_facade<ListIterator<T>,
+                                    const List<T>,
+                                    boost::forward_traversal_tag,
+                                    T>
+{
+ public:
+    ListIterator()
+      : list_()
+    {
+    }
+
+    explicit ListIterator(const List<T>& list)
+      : list_(list)
+    {
+    }
+
+ private:
+    friend class boost::iterator_core_access;
+
+    void increment()
+    {
+        list_ = list_.rest();
+    }
+
+    const bool equal(const ListIterator& other) const
+    {
+        return this->list_ == other.list_;
+    }
+
+    const T dereference() const
+    {
+        return list_.first();
+    }
+
+    List<T> list_;
+};
 
 }
 
