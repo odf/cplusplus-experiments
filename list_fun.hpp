@@ -60,6 +60,11 @@ bindRest(const F fun, const L lft, const L rgt, const A arg)
 }
 
 
+template<typename L>
+L getRest(const L list)
+{
+    return list.rest();
+}
 
 template<typename L, typename Functor>
 inline void forEach(const L list, const Functor f)
@@ -80,6 +85,10 @@ L mapList(const L src, const F fun)
     else
     {
         return makeList(fun(src.first()), bindRest(mapList<L, F>, src, fun));
+        // return makeList(fun(src.first()),
+        //                 curry(compose(mapList<L, F>,
+        //                               curry(getRest<L>, src)),
+        //                       fun));
     }
 }
 

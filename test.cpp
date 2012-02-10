@@ -43,7 +43,7 @@ int main()
     std::for_each(four.begin(), four.end(), print);
     cout << endl;
 
-    cout << mapList(four, curry(mul, 2)) << endl;
+    cout << mapList(four, compose(curry(mul, 2), curry(mul, 3))) << endl;
 
     cout << filterList(three, isOdd) << endl;
 
