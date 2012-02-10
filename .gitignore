@@ -1,3 +1,4 @@
 *.o
 test
 bgl_tour
+json_spirit_test
