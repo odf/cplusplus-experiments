@@ -7,6 +7,24 @@ namespace odf
 template<typename Function> struct function_traits;
 
 template<typename F>
+struct unaryCurrier;
+
+template<typename F>
+struct binaryCurrier;
+
+template<typename F>
+struct ternaryCurrier;
+
+template<typename Lft, typename Rgt>
+struct unaryComposer;
+
+template<typename Lft, typename Rgt>
+struct binaryComposer;
+
+template<typename Lft, typename Rgt>
+struct ternaryComposer;
+
+template<typename F>
 struct nullaryFunctor
 {
 };
@@ -16,6 +34,51 @@ struct function_traits<nullaryFunctor<F> >
 {
     static const std::size_t        arity = 0;
     typename F::result_type typedef result_type;
+};
+
+template<typename F>
+struct unaryFunctor
+{
+};
+
+template<typename F>
+struct function_traits<unaryFunctor<F> >
+{
+    static const std::size_t        arity = 1;
+    typedef struct unaryCurrier<F>  currier_type;
+    typename F::result_type typedef result_type;
+    typename F::arg1_type   typedef arg1_type;
+};
+
+template<typename F>
+struct binaryFunctor
+{
+};
+
+template<typename F>
+struct function_traits<binaryFunctor<F> >
+{
+    static const std::size_t        arity = 2;
+    typedef struct binaryCurrier<F> currier_type;
+    typename F::result_type typedef result_type;
+    typename F::arg1_type   typedef arg1_type;
+    typename F::arg2_type   typedef arg2_type;
+};
+
+template<typename F>
+struct ternaryFunctor
+{
+};
+
+template<typename F>
+struct function_traits<ternaryFunctor<F> >
+{
+    static const std::size_t         arity = 3;
+    typedef struct ternaryCurrier<F> currier_type;
+    typename F::result_type  typedef result_type;
+    typename F::arg1_type    typedef arg1_type;
+    typename F::arg2_type    typedef arg2_type;
+    typename F::arg3_type    typedef arg3_type;
 };
 
 template<typename F>
@@ -43,20 +106,6 @@ template<typename F>
 struct function_traits<unaryCurrier<F> > :
         function_traits<nullaryFunctor<unaryCurrier<F> > >
 {
-};
-
-template<typename F>
-struct unaryFunctor
-{
-};
-
-template<typename F>
-struct function_traits<unaryFunctor<F> >
-{
-    static const std::size_t        arity = 1;
-    typedef struct unaryCurrier<F>  currier_type;
-    typename F::result_type typedef result_type;
-    typename F::arg1_type   typedef arg1_type;
 };
 
 template<typename F>
@@ -88,21 +137,6 @@ struct function_traits<binaryCurrier<F> > :
 };
 
 template<typename F>
-struct binaryFunctor
-{
-};
-
-template<typename F>
-struct function_traits<binaryFunctor<F> >
-{
-    static const std::size_t        arity = 2;
-    typedef struct binaryCurrier<F> currier_type;
-    typename F::result_type typedef result_type;
-    typename F::arg1_type   typedef arg1_type;
-    typename F::arg2_type   typedef arg2_type;
-};
-
-template<typename F>
 struct ternaryCurrier : binaryFunctor<ternaryCurrier<F> >
 {
     typename function_traits<F>::result_type typedef result_type;
@@ -129,6 +163,93 @@ private:
 template<typename F>
 struct function_traits<ternaryCurrier<F> > :
         function_traits<binaryFunctor<ternaryCurrier<F> > >
+{
+};
+
+template<typename Lft, typename Rgt>
+struct unaryComposer : unaryFunctor<unaryComposer<Lft, Rgt> >
+{
+    typename function_traits<Lft>::result_type typedef result_type;
+    typename function_traits<Rgt>::arg1_type   typedef arg1_type;
+
+    unaryComposer(const Lft lft, const Rgt rgt) :
+        lft(lft), rgt(rgt)
+    {
+    }
+
+    const result_type operator() (const arg1_type arg) const
+    {
+        return lft(rgt(arg));
+    }
+
+private:
+    const Lft lft;
+    const Rgt rgt;
+};
+
+template<typename Lft, typename Rgt>
+struct function_traits<unaryComposer<Lft, Rgt> > :
+        function_traits<unaryFunctor<unaryComposer<Lft, Rgt> > >
+{
+};
+
+template<typename Lft, typename Rgt>
+struct binaryComposer : binaryFunctor<binaryComposer<Lft, Rgt> >
+{
+    typename function_traits<Lft>::result_type typedef result_type;
+    typename function_traits<Rgt>::arg1_type   typedef arg1_type;
+    typename function_traits<Lft>::arg2_type   typedef arg2_type;
+
+    binaryComposer(const Lft lft, const Rgt rgt) :
+        lft(lft), rgt(rgt)
+    {
+    }
+
+    const result_type operator() (const arg1_type arg1,
+                                  const arg2_type arg2) const
+    {
+        return lft(rgt(arg1), arg2);
+    }
+
+private:
+    const Lft lft;
+    const Rgt rgt;
+};
+
+template<typename Lft, typename Rgt>
+struct function_traits<binaryComposer<Lft, Rgt> > :
+        function_traits<binaryFunctor<binaryComposer<Lft, Rgt> > >
+{
+};
+
+template<typename Lft, typename Rgt>
+struct ternaryComposer : ternaryFunctor<ternaryComposer<Lft, Rgt> >
+{
+    typename function_traits<Lft>::result_type typedef result_type;
+    typename function_traits<Rgt>::arg1_type   typedef arg1_type;
+    typename function_traits<Lft>::arg2_type   typedef arg2_type;
+    typename function_traits<Lft>::arg3_type   typedef arg3_type;
+
+    ternaryComposer(const Lft lft, const Rgt rgt) :
+        lft(lft), rgt(rgt)
+    {
+    }
+
+    const result_type operator() (const arg1_type arg1,
+                                  const arg2_type arg2,
+                                  const arg3_type arg3) const
+    {
+        return lft(rgt(arg1), arg2, arg3);
+    }
+
+private:
+    const Lft lft;
+    const Rgt rgt;
+};
+
+template<typename Lft, typename Rgt>
+struct function_traits<ternaryComposer<Lft, Rgt> > :
+        function_traits<ternaryFunctor<ternaryComposer<Lft, Rgt> > >
 {
 };
 
@@ -193,33 +314,6 @@ curry2(
 {
     return curry(curry(fun, arg1), arg2);
 }
-
-template<typename Lft, typename Rgt>
-struct unaryComposer : unaryFunctor<unaryComposer<Lft, Rgt> >
-{
-    typename function_traits<Lft>::result_type typedef result_type;
-    typename function_traits<Rgt>::arg1_type   typedef arg1_type;
-
-    unaryComposer(const Lft lft, const Rgt rgt) :
-        lft(lft), rgt(rgt)
-    {
-    }
-
-    const result_type operator() (const arg1_type arg) const
-    {
-        return lft(rgt(arg));
-    }
-
-private:
-    const Lft lft;
-    const Rgt rgt;
-};
-
-template<typename Lft, typename Rgt>
-struct function_traits<unaryComposer<Lft, Rgt> > :
-        function_traits<unaryFunctor<unaryComposer<Lft, Rgt> > >
-{
-};
 
 template<typename Lft, typename Rgt>
 struct unaryComposer<Lft, Rgt> compose(const Lft lft, const Rgt rgt)
