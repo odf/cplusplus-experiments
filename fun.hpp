@@ -195,17 +195,17 @@ curry2(
 }
 
 template<typename Lft, typename Rgt>
-struct unaryComposer
+struct unaryComposer : unaryFunctor<unaryComposer<Lft, Rgt> >
 {
-    typename function_traits<Lft>::result_type typedef R;
-    typename function_traits<Rgt>::arg1_type   typedef A;
+    typename function_traits<Lft>::result_type typedef result_type;
+    typename function_traits<Rgt>::arg1_type   typedef arg1_type;
 
     unaryComposer(const Lft lft, const Rgt rgt) :
         lft(lft), rgt(rgt)
     {
     }
 
-    const R operator() (const A arg) const
+    const result_type operator() (const arg1_type arg) const
     {
         return lft(rgt(arg));
     }
@@ -216,14 +216,9 @@ private:
 };
 
 template<typename Lft, typename Rgt>
-struct function_traits<unaryComposer<Lft, Rgt> >
+struct function_traits<unaryComposer<Lft, Rgt> > :
+        function_traits<unaryFunctor<unaryComposer<Lft, Rgt> > >
 {
-    static const std::size_t arity = 1;
-
-    typedef struct unaryCurrier<unaryComposer<Lft, Rgt> > currier_type;
-
-    typename function_traits<Lft>::result_type R;
-    typename function_traits<Rgt>::arg1_type   A;
 };
 
 template<typename Lft, typename Rgt>
