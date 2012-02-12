@@ -46,6 +46,12 @@ struct function_traits<unaryFunctor<F> >
 {
     static const std::size_t        arity = 1;
     typedef struct unaryCurrier<F>  currier_type;
+    template<typename G>
+    struct composer
+    {
+        typedef struct unaryComposer<F, G> type;
+    };
+
     typename F::result_type typedef result_type;
     typename F::arg1_type   typedef arg1_type;
 };
@@ -60,6 +66,12 @@ struct function_traits<binaryFunctor<F> >
 {
     static const std::size_t        arity = 2;
     typedef struct binaryCurrier<F> currier_type;
+    template<typename G>
+    struct composer
+    {
+        typedef struct binaryComposer<F, G> type;
+    };
+
     typename F::result_type typedef result_type;
     typename F::arg1_type   typedef arg1_type;
     typename F::arg2_type   typedef arg2_type;
@@ -75,6 +87,12 @@ struct function_traits<ternaryFunctor<F> >
 {
     static const std::size_t         arity = 3;
     typedef struct ternaryCurrier<F> currier_type;
+    template<typename G>
+    struct composer
+    {
+        typedef struct ternaryComposer<F, G> type;
+    };
+
     typename F::result_type  typedef result_type;
     typename F::arg1_type    typedef arg1_type;
     typename F::arg2_type    typedef arg2_type;
@@ -263,9 +281,16 @@ struct function_traits<R(*)()>
 template<typename R, typename A>
 struct function_traits<R(*)(A)>
 {
+    typedef R(*F)(A);
+
     static const std::size_t arity = 1;
 
-    typedef struct unaryCurrier<R(*)(A)> currier_type;
+    typedef struct unaryCurrier<F> currier_type;
+    template<typename G>
+    struct composer
+    {
+        typedef struct unaryComposer<F, G> type;
+    };
 
     typedef R result_type;
     typedef A arg1_type;
@@ -274,9 +299,16 @@ struct function_traits<R(*)(A)>
 template<typename R, typename A, typename B>
 struct function_traits<R(*)(A, B)>
 {
+    typedef R(*F)(A, B);
+
     static const std::size_t arity = 2;
 
-    typedef struct binaryCurrier<R(*)(A, B)> currier_type;
+    typedef struct binaryCurrier<F> currier_type;
+    template<typename G>
+    struct composer
+    {
+        typedef struct binaryComposer<F, G> type;
+    };
 
     typedef R result_type;
     typedef A arg1_type;
@@ -286,9 +318,16 @@ struct function_traits<R(*)(A, B)>
 template<typename R, typename A, typename B, typename C>
 struct function_traits<R(*)(A, B, C)>
 {
+    typedef R(*F)(A, B, C);
+
     static const std::size_t arity = 3;
 
-    typedef struct ternaryCurrier<R(*)(A, B, C)> currier_type;
+    typedef struct ternaryCurrier<F> currier_type;
+    template<typename G>
+    struct composer
+    {
+        typedef struct ternaryComposer<F, G> type;
+    };
 
     typedef R result_type;
     typedef A arg1_type;
@@ -316,11 +355,13 @@ curry2(
 }
 
 template<typename Lft, typename Rgt>
-struct unaryComposer<Lft, Rgt> compose(const Lft lft, const Rgt rgt)
+typename function_traits<Lft>::template composer<Rgt>::type compose(
+    const Lft lft, const Rgt rgt)
 {
-    return unaryComposer<Lft, Rgt>(lft, rgt);
+    return typename function_traits<Lft>::
+        template composer<Rgt>::type(lft, rgt);
 }
-    
+
 }
 
 #endif // !ODF_FUN_HPP
