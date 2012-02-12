@@ -1,4 +1,4 @@
-CXXFLAGS = -g -O3
+CXXFLAGS = -g -O3 -I$(HOME)/include
 
 test:	test.o
 	$(CXX) $(CXXFLAGS) test.o -o test -lgmp -lm
