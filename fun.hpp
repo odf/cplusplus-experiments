@@ -336,7 +336,7 @@ struct function_traits<R(*)(A, B, C)>
 };
 
 template<typename F>
-typename function_traits<F>::currier_type curry(
+inline typename function_traits<F>::currier_type curry(
     const F fun,
     const typename function_traits<F>::arg1_type arg)
 {
@@ -344,7 +344,7 @@ typename function_traits<F>::currier_type curry(
 }
 
 template<typename F>
-typename function_traits<
+inline typename function_traits<
     typename function_traits<F>::currier_type>::currier_type
 curry2(
     const F fun,
@@ -355,7 +355,7 @@ curry2(
 }
 
 template<typename Lft, typename Rgt>
-typename function_traits<Lft>::template composer<Rgt>::type compose(
+inline typename function_traits<Lft>::template composer<Rgt>::type compose(
     const Lft lft, const Rgt rgt)
 {
     return typename function_traits<Lft>::
