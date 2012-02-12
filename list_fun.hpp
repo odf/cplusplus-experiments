@@ -7,59 +7,11 @@
 namespace odf
 {
 
-template<typename F, typename L, typename A>
-struct restBinder
+template<typename L>
+L getRest(const L list)
 {
-    restBinder(const F fun, const L src, const A arg) :
-        fun(fun), src(src), arg(arg)
-    {
-    }
-
-    const L operator() () const
-    {
-        return fun(src.rest(), arg);
-    }
-
-private:
-    const F fun;
-    const L src;
-    const A arg;
-};
-
-template<typename F, typename L, typename A>
-inline struct restBinder<F, L, A> bindRest(const F fun, const L src, const A arg)
-{
-    return restBinder<F, L, A>(fun, src, arg);
+    return list.rest();
 }
-
-template<typename F, typename L, typename A>
-struct restPairBinder
-{
-    restPairBinder(const F fun, const L lft, const L rgt, const A arg) :
-        fun(fun), lft(lft), rgt(rgt), arg(arg)
-    {
-    }
-
-    const L operator() () const
-    {
-        return fun(lft.rest(), rgt.rest(), arg);
-    }
-
-private:
-    const F fun;
-    const L lft;
-    const L rgt;
-    const A arg;
-};
-
-template<typename F, typename L, typename A>
-inline struct restPairBinder<F, L, A>
-bindRest(const F fun, const L lft, const L rgt, const A arg)
-{
-    return restPairBinder<F, L, A>(fun, lft, rgt, arg);
-}
-
-
 
 template<typename L, typename Functor>
 inline void forEach(const L list, const Functor f)
@@ -79,7 +31,9 @@ L mapList(const L src, const F fun)
     }
     else
     {
-        return makeList(fun(src.first()), bindRest(mapList<L, F>, src, fun));
+        return makeList(fun(src.first()),
+                        curry2(compose(mapList<L, F>, getRest<L>),
+                               src, fun));
     }
 }
 
@@ -93,7 +47,11 @@ L zipLists(const L lft, const L rgt, const F fun)
     else
     {
         return makeList(fun(lft.first(), rgt.first()),
-                        bindRest(zipLists<L, F>, lft, rgt, fun));
+                        curry2(compose(curry(compose(zipLists<L, F>,
+                                                     getRest<L>),
+                                             lft),
+                                       getRest<L>),
+                               rgt, fun));
     }
 }
 
@@ -136,7 +94,9 @@ L filterList(const L src, const F pred)
     }
     else
     {
-        return makeList(p.first(), bindRest(filterList<L, F>, p, pred));
+        return makeList(p.first(),
+                        curry2(compose(filterList<L, F>, getRest<L>),
+                               p, pred));
     }
 }
 
@@ -149,7 +109,9 @@ L takeList(const L list, const int n)
     }
     else
     {
-        return makeList(list.first(), bindRest(takeList<L>, list, n-1));
+        return makeList(list.first(),
+                        curry2(compose(takeList<L>, getRest<L>),
+                               list, n-1));
     }
 }
 

@@ -3,7 +3,6 @@
 #include <string>
 #include "Integer.h"
 #include "LinkedList.hpp"
-#include "ListIterator.hpp"
 #include "fun.hpp"
 #include "list_fun.hpp"
 
@@ -41,10 +40,10 @@ int main()
     forEach(three, print);
     cout << endl;
 
-    std::for_each(ListIterator<int>(four), ListIterator<int>(), print);
+    std::for_each(four.begin(), four.end(), print);
     cout << endl;
 
-    cout << mapList(four, curry(mul, 2)) << endl;
+    cout << mapList(four, compose(curry(mul, 2), curry(mul, 3))) << endl;
 
     cout << filterList(three, isOdd) << endl;
 
