@@ -8,31 +8,6 @@ namespace odf
 {
 
 template<typename F, typename L, typename A>
-struct restBinder
-{
-    restBinder(const F fun, const L src, const A arg) :
-        fun(fun), src(src), arg(arg)
-    {
-    }
-
-    const L operator() () const
-    {
-        return fun(src.rest(), arg);
-    }
-
-private:
-    const F fun;
-    const L src;
-    const A arg;
-};
-
-template<typename F, typename L, typename A>
-inline struct restBinder<F, L, A> bindRest(const F fun, const L src, const A arg)
-{
-    return restBinder<F, L, A>(fun, src, arg);
-}
-
-template<typename F, typename L, typename A>
 struct restPairBinder
 {
     restPairBinder(const F fun, const L lft, const L rgt, const A arg) :
@@ -84,11 +59,9 @@ L mapList(const L src, const F fun)
     }
     else
     {
-        return makeList(fun(src.first()), bindRest(mapList<L, F>, src, fun));
-        // return makeList(fun(src.first()),
-        //                 curry(compose(mapList<L, F>,
-        //                               curry(getRest<L>, src)),
-        //                       fun));
+        return makeList(fun(src.first()),
+                        curry2(compose(mapList<L, F>, getRest<L>),
+                               src, fun));
     }
 }
 
@@ -145,7 +118,9 @@ L filterList(const L src, const F pred)
     }
     else
     {
-        return makeList(p.first(), bindRest(filterList<L, F>, p, pred));
+        return makeList(p.first(),
+                        curry2(compose(filterList<L, F>, getRest<L>),
+                               p, pred));
     }
 }
 
@@ -158,7 +133,9 @@ L takeList(const L list, const int n)
     }
     else
     {
-        return makeList(list.first(), bindRest(takeList<L>, list, n-1));
+        return makeList(list.first(),
+                        curry2(compose(takeList<L>, getRest<L>),
+                               list, n-1));
     }
 }
 
