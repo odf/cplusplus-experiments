@@ -7,34 +7,6 @@
 namespace odf
 {
 
-template<typename F, typename L, typename A>
-struct restPairBinder
-{
-    restPairBinder(const F fun, const L lft, const L rgt, const A arg) :
-        fun(fun), lft(lft), rgt(rgt), arg(arg)
-    {
-    }
-
-    const L operator() () const
-    {
-        return fun(lft.rest(), rgt.rest(), arg);
-    }
-
-private:
-    const F fun;
-    const L lft;
-    const L rgt;
-    const A arg;
-};
-
-template<typename F, typename L, typename A>
-inline struct restPairBinder<F, L, A>
-bindRest(const F fun, const L lft, const L rgt, const A arg)
-{
-    return restPairBinder<F, L, A>(fun, lft, rgt, arg);
-}
-
-
 template<typename L>
 L getRest(const L list)
 {
@@ -75,7 +47,11 @@ L zipLists(const L lft, const L rgt, const F fun)
     else
     {
         return makeList(fun(lft.first(), rgt.first()),
-                        bindRest(zipLists<L, F>, lft, rgt, fun));
+                        curry2(compose(curry(compose(zipLists<L, F>,
+                                                     getRest<L>),
+                                             lft),
+                                       getRest<L>),
+                               rgt, fun));
     }
 }
 
