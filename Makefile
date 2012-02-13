@@ -13,6 +13,13 @@ mpi_test.o: mpi_test.cpp
 mpi_test: mpi_test.o
 	mpic++ $(CXXFLAGS) mpi_test.o -o mpi_test
 
+clean:
+	rm -f *.o
+
+distclean:	clean
+	rm -f test json_spirit_test mpi_test bgl_tour
+
+
 # DO NOT DELETE
 
 test.o: Integer.h shared_array.hpp LinkedList.hpp Thunk.hpp nullstream.hpp
