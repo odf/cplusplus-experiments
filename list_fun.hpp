@@ -129,10 +129,42 @@ L dropList(const L list, const int n)
     return p;
 }
 
+template<typename L>
+L reverseList(const L list)
+{
+    L result;
+
+    for(L p = list; not p.isEmpty(); p = p.rest())
+    {
+        result = makeList(p.first(), result);
+    }
+
+    return result;
+}
+
 template<typename T>
 List<T> listFrom(const T start)
 {
     return makeList(start, curry(listFrom<T>, start + 1));
+}
+
+template<typename Iter>
+List<typename Iter::value_type> asList(Iter iter, const Iter end)
+{
+    List<typename Iter::value_type> result;
+
+    while (iter != end)
+    {
+        result = makeList(*iter++, result);
+    }
+
+    return reverseList(result);
+}
+
+template<typename C>
+List<typename C::value_type> asList(const C& collection)
+{
+    return asList(collection.begin(), collection.end());
 }
 
 }
