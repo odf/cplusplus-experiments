@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include "Integer.h"
-#include "LinkedList.hpp"
+#include "list.hpp"
 #include "fun.hpp"
 #include "list_fun.hpp"
 

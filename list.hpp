@@ -1,9 +1,9 @@
-#ifndef ODF_LINKEDLIST_HPP
-#define ODF_LINKEDLIST_HPP 1
+#ifndef ODF_LIST_HPP
+#define ODF_LIST_HPP 1
 
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "Thunk.hpp"
+#include "thunk.hpp"
 
 namespace odf
 {
@@ -157,4 +157,4 @@ class ListIterator
 
 }
 
-#endif // !ODF_LINKEDLIST_HPP
+#endif // !ODF_LIST_HPP

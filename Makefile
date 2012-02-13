@@ -29,5 +29,5 @@ distclean:	clean
 
 # DO NOT DELETE
 
-test.o: Integer.h shared_array.hpp LinkedList.hpp Thunk.hpp nullstream.hpp
+test.o: Integer.h shared_array.hpp list.hpp thunk.hpp nullstream.hpp
 test.o: fun.hpp list_fun.hpp
