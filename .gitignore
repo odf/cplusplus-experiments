@@ -4,3 +4,4 @@ bgl_tour
 json_spirit_test
 Makefile.bak
 mpi_test
+boost_mpi_test

@@ -56,3 +56,10 @@ int main(int argc, char **argv)
     MPI::Finalize();
     return 0;
 }
+
+/*
+** Local Variables:
+** mode:C++
+** compile-command: "make -k mpi_test"
+** End:
+*/

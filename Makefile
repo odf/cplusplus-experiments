@@ -13,11 +13,18 @@ mpi_test.o: mpi_test.cpp
 mpi_test: mpi_test.o
 	mpic++ $(CXXFLAGS) mpi_test.o -o mpi_test
 
+boost_mpi_test.o: boost_mpi_test.cpp
+	mpic++ $(CXXFLAGS) -c boost_mpi_test.cpp -o boost_mpi_test.o
+
+boost_mpi_test: boost_mpi_test.o
+	mpic++ $(CXXFLAGS) boost_mpi_test.o -o boost_mpi_test \
+	  -lboost_mpi-mt -lboost_serialization-mt
+
 clean:
 	rm -f *.o
 
 distclean:	clean
-	rm -f test json_spirit_test mpi_test bgl_tour
+	rm -f test json_spirit_test mpi_test boost_mpi_test bgl_tour
 
 
 # DO NOT DELETE
