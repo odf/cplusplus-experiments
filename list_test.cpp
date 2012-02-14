@@ -43,7 +43,7 @@ struct Dummy
     {
     }
 
-    int getN()
+    int getN() const
     {
         return n;
     }

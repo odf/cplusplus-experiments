@@ -24,18 +24,20 @@ struct binaryComposer;
 template<typename Lft, typename Rgt>
 struct ternaryComposer;
 
-template<class K, typename F>
-struct nullaryMemberFunctor;
-
 template<typename F>
 struct nullaryFunctor
 {
 };
 
 template<typename F>
-struct function_traits<nullaryFunctor<F> >
+struct nullaryFunctionTraits
 {
-    static const std::size_t        arity = 0;
+    static const std::size_t arity = 0;
+};
+
+template<typename F>
+struct function_traits<nullaryFunctor<F> > : nullaryFunctionTraits<F>
+{
     typename F::result_type typedef result_type;
 };
 
@@ -112,6 +114,164 @@ struct function_traits<ternaryFunctor<F> > : ternaryFunctionTraits<F>
     typename F::arg1_type    typedef arg1_type;
     typename F::arg2_type    typedef arg2_type;
     typename F::arg3_type    typedef arg3_type;
+};
+
+template<class K, typename F>
+struct nullaryMemberFunctor : unaryFunctor<F>
+{
+    typename function_traits<F>::result_type typedef result_type;
+    typedef K                                        arg1_type;
+
+    nullaryMemberFunctor(const F fun) :
+        fun(fun)
+    {
+    }
+
+    const result_type operator() (K& obj) const
+    {
+        return ((obj).*(fun))();
+    }
+
+private:
+    const F fun;
+};
+
+template<class K, typename F>
+struct function_traits<nullaryMemberFunctor<K, F> > :
+        function_traits<unaryFunctor<nullaryMemberFunctor<K, F> > >
+{
+};
+
+template<class K, typename F>
+struct nullaryConstMemberFunctor : unaryFunctor<F>
+{
+    typename function_traits<F>::result_type typedef result_type;
+    typedef K                                        arg1_type;
+
+    nullaryConstMemberFunctor(const F fun) :
+        fun(fun)
+    {
+    }
+
+    const result_type operator() (const K& obj) const
+    {
+        return ((obj).*(fun))();
+    }
+
+private:
+    const F fun;
+};
+
+template<class K, typename F>
+struct function_traits<nullaryConstMemberFunctor<K, F> > :
+        function_traits<unaryFunctor<nullaryConstMemberFunctor<K, F> > >
+{
+};
+
+template<class K, typename F>
+struct unaryMemberFunctor : binaryFunctor<F>
+{
+    typename function_traits<F>::result_type typedef result_type;
+    typename function_traits<F>::arg2_type   typedef A;
+
+    unaryMemberFunctor(const F fun) :
+        fun(fun)
+    {
+    }
+
+    const result_type operator() (K& obj, const A arg) const
+    {
+        return ((obj).*(fun))(arg);
+    }
+
+private:
+    const F fun;
+};
+
+template<class K, typename F>
+struct function_traits<unaryMemberFunctor<K, F> > :
+        function_traits<binaryFunctor<unaryMemberFunctor<K, F> > >
+{
+};
+
+template<class K, typename F>
+struct unaryConstMemberFunctor : binaryFunctor<F>
+{
+    typename function_traits<F>::result_type typedef result_type;
+    typename function_traits<F>::arg2_type   typedef A;
+
+    unaryConstMemberFunctor(const F fun) :
+        fun(fun)
+    {
+    }
+
+    const result_type operator() (const K& obj, const A arg) const
+    {
+        return ((obj).*(fun))(arg);
+    }
+
+private:
+    const F fun;
+};
+
+template<class K, typename F>
+struct function_traits<unaryConstMemberFunctor<K, F> > :
+        function_traits<binaryFunctor<unaryConstMemberFunctor<K, F> > >
+{
+};
+
+template<class K, typename F>
+struct binaryMemberFunctor : ternaryFunctor<F>
+{
+    typename function_traits<F>::result_type typedef result_type;
+    typename function_traits<F>::arg2_type   typedef A;
+    typename function_traits<F>::arg3_type   typedef B;
+
+    binaryMemberFunctor(const F fun) :
+        fun(fun)
+    {
+    }
+
+    const result_type operator() (K& obj, const A arg1, const B arg2) const
+    {
+        return ((obj).*(fun))(arg1, arg2);
+    }
+
+private:
+    const F fun;
+};
+
+template<class K, typename F>
+struct function_traits<binaryMemberFunctor<K, F> > :
+        function_traits<ternaryFunctor<binaryMemberFunctor<K, F> > >
+{
+};
+
+template<class K, typename F>
+struct binaryConstMemberFunctor : ternaryFunctor<F>
+{
+    typename function_traits<F>::result_type typedef result_type;
+    typename function_traits<F>::arg2_type   typedef A;
+    typename function_traits<F>::arg3_type   typedef B;
+
+    binaryConstMemberFunctor(const F fun) :
+        fun(fun)
+    {
+    }
+
+    const result_type operator() (K& obj, const A arg1, const B arg2) const
+    {
+        return ((obj).*(fun))(arg1, arg2);
+    }
+
+private:
+    const F fun;
+};
+
+template<class K, typename F>
+struct function_traits<binaryConstMemberFunctor<K, F> > :
+        function_traits<ternaryFunctor<binaryConstMemberFunctor<K, F> > >
+{
 };
 
 template<typename F>
@@ -287,10 +447,9 @@ struct function_traits<ternaryComposer<Lft, Rgt> > :
 };
 
 template<typename R>
-struct function_traits<R(*)()>
+struct function_traits<R(*)()> : nullaryFunctionTraits<R(*)()>
 {
     static const std::size_t arity = 0;
-    typedef R                result_type;
 };
 
 template<typename R, typename A>
@@ -318,9 +477,20 @@ struct function_traits<R(*)(A, B, C)> : ternaryFunctionTraits<R(*)(A, B, C)>
 };
 
 template<class K, typename R>
-struct function_traits<R(K::*)()> : unaryFunctionTraits<R(K::*)()>
+struct function_traits<R(K::*)()> :
+    unaryFunctionTraits<R(K::*)()>
 {
-    typedef struct nullaryMemberFunctor<K, R(K::*)()> functor_type;
+    typedef struct nullaryMemberFunctor<K, R(K::*)()> wrapper_type;
+
+    typedef R result_type;
+    typedef K arg1_type;
+};
+
+template<class K, typename R>
+struct function_traits<R (K::*)() const> :
+    unaryFunctionTraits<R (K::*)() const>
+{
+    typedef struct nullaryConstMemberFunctor<K, R (K::*)() const> wrapper_type;
 
     typedef R result_type;
     typedef K arg1_type;
@@ -329,6 +499,19 @@ struct function_traits<R(K::*)()> : unaryFunctionTraits<R(K::*)()>
 template<class K, typename R, typename A>
 struct function_traits<R(K::*)(A)> : binaryFunctionTraits<R(K::*)(A)>
 {
+    typedef struct unaryMemberFunctor<K, R(K::*)(A)> wrapper_type;
+
+    typedef R result_type;
+    typedef K arg1_type;
+    typedef A arg2_type;
+};
+
+template<class K, typename R, typename A>
+struct function_traits<R (K::*)(A) const> :
+    binaryFunctionTraits<R (K::*)(A) const>
+{
+    typedef struct unaryConstMemberFunctor<K, R (K::*)(A) const> wrapper_type;
+
     typedef R result_type;
     typedef K arg1_type;
     typedef A arg2_type;
@@ -337,30 +520,25 @@ struct function_traits<R(K::*)(A)> : binaryFunctionTraits<R(K::*)(A)>
 template<class K, typename R, typename A, typename B>
 struct function_traits<R(K::*)(A, B)> : ternaryFunctionTraits<R(K::*)(A, B)>
 {
+    typedef struct binaryMemberFunctor<K, R(K::*)(A, B)> wrapper_type;
+
     typedef R result_type;
     typedef K arg1_type;
     typedef A arg2_type;
     typedef B arg3_type;
 };
 
-template<class K, typename F>
-struct nullaryMemberFunctor : unaryFunctor<F>
+template<class K, typename R, typename A, typename B>
+struct function_traits<R (K::*)(A, B) const> :
+    ternaryFunctionTraits<R (K::*)(A, B) const>
 {
-    typename function_traits<F>::result_type typedef result_type;
-    typename function_traits<F>::arg1_type   typedef arg1_type;
+    typedef
+    struct binaryConstMemberFunctor<K, R (K::*)(A, B) const> wrapper_type;
 
-    nullaryMemberFunctor(const F fun) :
-        fun(fun)
-    {
-    }
-
-    const result_type operator() (K& obj) const
-    {
-        return ((obj).*(fun))();
-    }
-
-private:
-    const F fun;
+    typedef R result_type;
+    typedef K arg1_type;
+    typedef A arg2_type;
+    typedef B arg3_type;
 };
 
 template<typename F>
@@ -417,9 +595,9 @@ inline typename function_traits<Lft>::template composer<Rgt>::type compose(
 }
 
 template<typename F>
-inline typename function_traits<F>::functor_type memFun(const F fun)
+inline typename function_traits<F>::wrapper_type memFun(const F fun)
 {
-    return typename function_traits<F>::functor_type(fun);
+    return typename function_traits<F>::wrapper_type(fun);
 }
 
 }

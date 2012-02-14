@@ -77,13 +77,8 @@ L mapList(const L src, const F fun)
     else
     {
         return makeList(fun(src.first()),
-                        curry(compose(mapList<L, F>, getRest<L>),
+                        curry(compose(mapList<L, F>, memFun(&L::rest)),
                               src, fun));
-         // return makeList(fun(src.first()),
-         //                curry(compose(mapList<L, F>,
-         //                              nullaryMemberFunction<L, L(L::*)()>(
-         //                                  &L::rest)),
-         //                      src, fun));
    }
 }
 
