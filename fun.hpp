@@ -4,7 +4,19 @@
 namespace odf
 {
 
-template<typename Function> struct function_traits;
+template<typename F>
+struct function_traits;
+
+template<typename F>
+struct commonFunctionTraits
+{
+    typedef F wrapper_type;
+
+    static inline wrapper_type wrap(const F fun)
+    {
+        return wrapper_type(fun);
+    }
+};
 
 template<typename F>
 struct unaryCurrier;
@@ -47,7 +59,7 @@ struct unaryFunctor
 };
 
 template<typename F>
-struct unaryFunctionTraits
+struct unaryFunctionTraits : commonFunctionTraits<F>
 {
     static const std::size_t        arity = 1;
     typedef struct unaryCurrier<F>  currier_type;
@@ -71,7 +83,7 @@ struct binaryFunctor
 };
 
 template<typename F>
-struct binaryFunctionTraits
+struct binaryFunctionTraits : commonFunctionTraits<F>
 {
     static const std::size_t        arity = 2;
     typedef struct binaryCurrier<F> currier_type;
@@ -96,7 +108,7 @@ struct ternaryFunctor
 };
 
 template<typename F>
-struct ternaryFunctionTraits
+struct ternaryFunctionTraits : commonFunctionTraits<F>
 {
     static const std::size_t         arity = 3;
     typedef struct ternaryCurrier<F> currier_type;
@@ -542,23 +554,26 @@ struct function_traits<R (K::*)(A, B) const> :
 };
 
 template<typename F>
-inline
-typename function_traits<
-    F
-    >::currier_type
+struct currierTraits
+{
+    typename function_traits<F>::wrapper_type     typedef wrapF;
+    typename function_traits<wrapF>::currier_type typedef result_type;
+};
+
+template<typename F>
+inline typename currierTraits<F>::result_type
 curry(
     const F fun,
     const typename function_traits<F>::arg1_type arg)
 {
-    return typename function_traits<F>::currier_type(fun, arg);
+    return typename currierTraits<F>::result_type(
+        function_traits<F>::wrap(fun), arg);
 }
 
 template<typename F>
 inline
 typename function_traits<
-    typename function_traits<
-        F
-        >::currier_type
+    typename currierTraits<F>::result_type
     >::currier_type
 curry(
     const F fun,
@@ -572,9 +587,7 @@ template<typename F>
 inline
 typename function_traits<
     typename function_traits<
-        typename function_traits<
-            F
-            >::currier_type
+        typename currierTraits<F>::result_type
         >::currier_type
     >::currier_type
 curry(
@@ -587,17 +600,28 @@ curry(
 }
 
 template<typename Lft, typename Rgt>
-inline typename function_traits<Lft>::template composer<Rgt>::type compose(
-    const Lft lft, const Rgt rgt)
+struct composerTraits
 {
-    return typename function_traits<Lft>::
-        template composer<Rgt>::type(lft, rgt);
-}
+    typename function_traits<Lft>::wrapper_type typedef wrapLft;
+    typename function_traits<Rgt>::wrapper_type typedef wrapRgt;
+
+    typename function_traits<wrapLft>::template composer<wrapRgt>::type
+    typedef result_type;
+};
+
+template<typename Lft, typename Rgt>
+inline typename composerTraits<Lft, Rgt>::result_type
+compose(const Lft lft, const Rgt rgt)
+{
+    return typename composerTraits<Lft, Rgt>::result_type(
+        function_traits<Lft>::wrap(lft),
+        function_traits<Rgt>::wrap(rgt));
+};
 
 template<typename F>
 inline typename function_traits<F>::wrapper_type method(const F fun)
 {
-    return typename function_traits<F>::wrapper_type(fun);
+    return function_traits<F>::wrap(fun);
 }
 
 }

@@ -41,7 +41,7 @@ int main()
 {
     double a[] = { 3.14, 2.72, 1.23 };
     List<int> three = makeList(3, makeList(2, makeList(1)));
-    List<int> four  = makeList(4, curry(method(&List<int>::rest), three));
+    List<int> four  = makeList(4, curry(&List<int>::rest, three));
 
     cout << three << endl;
     cout << four << endl;

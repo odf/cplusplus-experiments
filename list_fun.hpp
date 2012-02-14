@@ -71,8 +71,7 @@ L mapList(const L src, const F fun)
     else
     {
         return makeList(fun(src.first()),
-                        curry(compose(mapList<L, F>, method(&L::rest)),
-                              src, fun));
+                        curry(compose(mapList<L, F>, &L::rest), src, fun));
    }
 }
 
@@ -86,10 +85,9 @@ L zipLists(const L lft, const L rgt, const F fun)
     else
     {
         return makeList(fun(lft.first(), rgt.first()),
-                        curry(compose(curry(compose(zipLists<L, F>,
-                                                    method(&L::rest)),
-                                             lft),
-                                      method(&L::rest)),
+                        curry(compose(curry(compose(zipLists<L, F>, &L::rest),
+                                            lft),
+                                      &L::rest),
                               rgt, fun));
     }
 }
@@ -134,8 +132,7 @@ L filterList(const L src, const F pred)
     else
     {
         return makeList(p.first(),
-                        curry(compose(filterList<L, F>, method(&L::rest)),
-                              p, pred));
+                        curry(compose(filterList<L, F>, &L::rest), p, pred));
     }
 }
 
@@ -149,8 +146,7 @@ L takeList(const L list, const int n)
     else
     {
         return makeList(list.first(),
-                        curry(compose(takeList<L>, method(&L::rest)),
-                              list, n-1));
+                        curry(compose(takeList<L>, &L::rest), list, n-1));
     }
 }
 
