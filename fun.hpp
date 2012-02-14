@@ -595,7 +595,7 @@ inline typename function_traits<Lft>::template composer<Rgt>::type compose(
 }
 
 template<typename F>
-inline typename function_traits<F>::wrapper_type memFun(const F fun)
+inline typename function_traits<F>::wrapper_type method(const F fun)
 {
     return typename function_traits<F>::wrapper_type(fun);
 }

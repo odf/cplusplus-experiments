@@ -52,12 +52,6 @@ inline List<T> asList(const T(&a)[N])
     return arraySlice<T>(a, 0, N);
 }
 
-template<typename L>
-L getRest(const L list)
-{
-    return list.rest();
-}
-
 template<typename L, typename Functor>
 inline void forEach(const L list, const Functor f)
 {
@@ -77,7 +71,7 @@ L mapList(const L src, const F fun)
     else
     {
         return makeList(fun(src.first()),
-                        curry(compose(mapList<L, F>, memFun(&L::rest)),
+                        curry(compose(mapList<L, F>, method(&L::rest)),
                               src, fun));
    }
 }
@@ -93,9 +87,9 @@ L zipLists(const L lft, const L rgt, const F fun)
     {
         return makeList(fun(lft.first(), rgt.first()),
                         curry(compose(curry(compose(zipLists<L, F>,
-                                                    getRest<L>),
+                                                    method(&L::rest)),
                                              lft),
-                                      getRest<L>),
+                                      method(&L::rest)),
                               rgt, fun));
     }
 }
@@ -140,7 +134,7 @@ L filterList(const L src, const F pred)
     else
     {
         return makeList(p.first(),
-                        curry(compose(filterList<L, F>, getRest<L>),
+                        curry(compose(filterList<L, F>, method(&L::rest)),
                               p, pred));
     }
 }
@@ -155,7 +149,7 @@ L takeList(const L list, const int n)
     else
     {
         return makeList(list.first(),
-                        curry(compose(takeList<L>, getRest<L>),
+                        curry(compose(takeList<L>, method(&L::rest)),
                               list, n-1));
     }
 }
