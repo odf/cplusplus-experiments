@@ -68,9 +68,17 @@ public:
     void addVertex(const T v)
     {
         verts_.insert(v);
+        if (forw_.count(v) == 0)
+        {
+            forw_[v] = vertex_collection_type();
+        }
+        if (back_.count(v) == 0)
+        {
+            back_[v] = vertex_collection_type();
+        }
     }
 
-    const int nvertices() const
+    const int nrVertices() const
     {
         return verts_.size();
     }
@@ -80,9 +88,14 @@ public:
         return asList(verts_);
     }
 
-    const int nedges() const
+    const int nrNeighbors(const T v) const
     {
-        return 0;
+        return forw_.at(v).size();
+    };
+
+    const int nrEdges() const
+    {
+        return sum(mapList(vertices(), curry(&Graph::nrNeighbors, *this)));
     }
 };
 

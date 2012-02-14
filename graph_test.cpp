@@ -17,10 +17,10 @@ int main()
 
     Graph<int> G(asList(edges));
 
-    cout << "Graph has " << G.nvertices() << " vertices:" << endl;
+    cout << "Graph has " << G.nrVertices() << " vertices:" << endl;
     cout << G.vertices() << endl << endl;
 
-    cout << "Graph has " << G.nedges() << " edges:" << endl;
+    cout << "Graph has " << G.nrEdges() << " edges:" << endl;
     //cout << G.edges() << endl << endl;
 }
 

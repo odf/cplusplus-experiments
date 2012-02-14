@@ -184,14 +184,15 @@ template<class K, typename F>
 struct unaryMemberFunctor : binaryFunctor<F>
 {
     typename function_traits<F>::result_type typedef result_type;
-    typename function_traits<F>::arg2_type   typedef A;
+    typedef  K                                       arg1_type;
+    typename function_traits<F>::arg2_type   typedef arg2_type;
 
     unaryMemberFunctor(const F fun) :
         fun(fun)
     {
     }
 
-    const result_type operator() (K& obj, const A arg) const
+    const result_type operator() (K& obj, const arg2_type arg) const
     {
         return ((obj).*(fun))(arg);
     }
@@ -210,14 +211,15 @@ template<class K, typename F>
 struct unaryConstMemberFunctor : binaryFunctor<F>
 {
     typename function_traits<F>::result_type typedef result_type;
-    typename function_traits<F>::arg2_type   typedef A;
+    typedef  K                                       arg1_type;
+    typename function_traits<F>::arg2_type   typedef arg2_type;
 
     unaryConstMemberFunctor(const F fun) :
         fun(fun)
     {
     }
 
-    const result_type operator() (const K& obj, const A arg) const
+    const result_type operator() (const K& obj, const arg2_type arg) const
     {
         return ((obj).*(fun))(arg);
     }
