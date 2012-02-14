@@ -8,6 +8,50 @@
 namespace odf
 {
 
+template<typename T>
+List<T> listFrom(const T start)
+{
+    return makeList(start, curry(listFrom<T>, start + 1));
+}
+
+template<typename Iter>
+List<typename Iter::value_type> asList(Iter iter, const Iter end)
+{
+    List<typename Iter::value_type> result;
+
+    while (iter != end)
+    {
+        result = makeList(*iter++, result);
+    }
+
+    return reverseList(result);
+}
+
+template<typename C>
+inline List<typename C::value_type> asList(const C& collection)
+{
+    return asList(collection.begin(), collection.end());
+}
+
+template<typename T>
+List<T> arraySlice(const T a[], const int from, const int to)
+{
+    if (from >= to)
+    {
+        return List<T>();
+    }
+    else
+    {
+        return makeList(a[from], curry(arraySlice<T>, a, from+1, to));
+    }
+}
+
+template<typename T, std::size_t N>
+inline List<T> asList(const T(&a)[N])
+{
+    return arraySlice<T>(a, 0, N);
+}
+
 template<typename L>
 L getRest(const L list)
 {
@@ -143,48 +187,37 @@ L reverseList(const L list)
     return result;
 }
 
-template<typename T>
-List<T> listFrom(const T start)
+template<typename L, typename F>
+typename L::value_type reduceList(const L list,
+                                  const typename L::value_type init,
+                                  const F combine)
 {
-    return makeList(start, curry(listFrom<T>, start + 1));
-}
+    typename L::value_type result = init;
 
-template<typename Iter>
-List<typename Iter::value_type> asList(Iter iter, const Iter end)
-{
-    List<typename Iter::value_type> result;
-
-    while (iter != end)
+    for (L p = list; !p.isEmpty(); p = p.rest())
     {
-        result = makeList(*iter++, result);
+        result = combine(result, p.first());
     }
 
-    return reverseList(result);
+    return result;
 }
 
-template<typename C>
-inline List<typename C::value_type> asList(const C& collection)
+template<typename L, typename F>
+typename L::value_type reduceList(const L list, const F combine)
 {
-    return asList(collection.begin(), collection.end());
+    return reduceList(list.rest(), list.first(), combine);
 }
 
-template<typename T>
-List<T> arraySlice(const T a[], const int from, const int to)
+template<typename L>
+typename L::value_type sum(const L list)
 {
-    if (from >= to)
-    {
-        return List<T>();
-    }
-    else
-    {
-        return makeList(a[from], curry(arraySlice<T>, a, from+1, to));
-    }
+    return reduceList(list, std::plus<typename L::value_type>());
 }
 
-template<typename T, std::size_t N>
-inline List<T> asList(const T(&a)[N])
+template<typename L>
+typename L::value_type product(const L list)
 {
-    return arraySlice<T>(a, 0, N);
+    return reduceList(list, std::multiplies<typename L::value_type>());
 }
 
 }

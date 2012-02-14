@@ -14,7 +14,8 @@ void print(const int val)
     cout << "<" << val << ">";
 }
 
-int mul(const int lft, const int rgt)
+template<typename T>
+T mul(const T lft, const T rgt)
 {
     return lft * rgt;
 }
@@ -47,6 +48,8 @@ int main()
 
     cout << arraySlice(a, 1, length(a)) << endl;
     cout << asList(a) << endl;
+    cout << reduceList(asList(a), mul<double>) << endl;
+    cout << sum(asList(a)) << endl;
 
     forEach(three, print);
     cout << endl;
@@ -54,7 +57,8 @@ int main()
     std::for_each(four.begin(), four.end(), print);
     cout << endl;
 
-    cout << mapList(four, compose(curry(mul, 2), curry(mul, 3))) << endl;
+    cout << mapList(four, compose(curry(mul<int>, 2), curry(mul<int>, 3)))
+         << endl;
 
     cout << filterList(three, isOdd) << endl;
 
