@@ -79,7 +79,12 @@ L mapList(const L src, const F fun)
         return makeList(fun(src.first()),
                         curry(compose(mapList<L, F>, getRest<L>),
                               src, fun));
-    }
+         // return makeList(fun(src.first()),
+         //                curry(compose(mapList<L, F>,
+         //                              nullaryMemberFunction<L, L(L::*)()>(
+         //                                  &L::rest)),
+         //                      src, fun));
+   }
 }
 
 template<typename L, typename F>

@@ -24,6 +24,9 @@ struct binaryComposer;
 template<typename Lft, typename Rgt>
 struct ternaryComposer;
 
+template<class K, typename F>
+struct nullaryMemberFunctor;
+
 template<typename F>
 struct nullaryFunctor
 {
@@ -335,6 +338,84 @@ struct function_traits<R(*)(A, B, C)>
     typedef C arg3_type;
 };
 
+template<class K, typename R>
+struct function_traits<R(K::*)()>
+{
+    typedef R(K::*F)();
+
+    static const std::size_t arity = 1;
+
+    typedef struct unaryCurrier<F> currier_type;
+    template<typename G>
+    struct composer
+    {
+        typedef struct unaryComposer<F, G> type;
+    };
+    typedef struct nullaryMemberFunctor<K, F> functor_type;
+
+    typedef R result_type;
+    typedef K arg1_type;
+};
+
+template<class K, typename R, typename A>
+struct function_traits<R(K::*)(A)>
+{
+    typedef R(K::*F)(A);
+
+    static const std::size_t arity = 2;
+
+    typedef struct binaryCurrier<F> currier_type;
+    template<typename G>
+    struct composer
+    {
+        typedef struct binaryComposer<F, G> type;
+    };
+
+    typedef R result_type;
+    typedef K arg1_type;
+    typedef A arg2_type;
+};
+
+template<class K, typename R, typename A, typename B>
+struct function_traits<R(K::*)(A, B)>
+{
+    typedef R(K::*F)(A, B);
+
+    static const std::size_t arity = 3;
+
+    typedef struct ternaryCurrier<F> currier_type;
+    template<typename G>
+    struct composer
+    {
+        typedef struct ternaryComposer<F, G> type;
+    };
+
+    typedef R result_type;
+    typedef K arg1_type;
+    typedef A arg2_type;
+    typedef B arg3_type;
+};
+
+template<class K, typename F>
+struct nullaryMemberFunctor : unaryFunctor<F>
+{
+    typename function_traits<F>::result_type typedef result_type;
+    typename function_traits<F>::arg1_type   typedef arg1_type;
+
+    nullaryMemberFunctor(const F fun) :
+        fun(fun)
+    {
+    }
+
+    const result_type operator() (K& obj) const
+    {
+        return ((obj).*(fun))();
+    }
+
+private:
+    const F fun;
+};
+
 template<typename F>
 inline
 typename function_traits<
@@ -386,6 +467,12 @@ inline typename function_traits<Lft>::template composer<Rgt>::type compose(
 {
     return typename function_traits<Lft>::
         template composer<Rgt>::type(lft, rgt);
+}
+
+template<typename F>
+inline typename function_traits<F>::functor_type memFun(const F fun)
+{
+    return typename function_traits<F>::functor_type(fun);
 }
 
 }
