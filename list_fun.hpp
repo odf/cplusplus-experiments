@@ -2,6 +2,7 @@
 #define ODF_LIST_FUN_HPP 1
 
 #include <functional>
+#include "List.hpp"
 #include "fun.hpp"
 
 namespace odf

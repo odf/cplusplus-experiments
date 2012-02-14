@@ -30,13 +30,24 @@ public:
     typedef pair<T, T> edge_type;
 
     template<class Iterator>
-    Graph(Iterator iter, const Iterator end) :
+    explicit Graph(Iterator iter, const Iterator end) :
         verts_(), forw_(), back_()
     {
         for(; iter != end; ++iter)
         {
             T from, to;
             tie(from, to) = *iter;
+            addEdge(from, to);
+        }
+    }
+
+    explicit Graph(const List<edge_type> edges) :
+        verts_(), forw_(), back_()
+    {
+        for(List<edge_type> p = edges; not p.isEmpty(); p = p.rest())
+        {
+            T from, to;
+            tie(from, to) = p.first();
             addEdge(from, to);
         }
     }
