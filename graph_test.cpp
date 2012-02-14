@@ -1,7 +1,7 @@
 #include <iostream>
 #include <utility>
 
-#include "graph.hpp"
+#include "Graph.hpp"
 
 using namespace odf;
 

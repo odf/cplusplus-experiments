@@ -1,7 +1,7 @@
 *.o
-test
+Makefile.bak
+list_test
+graph_test
+boost_mpi_test
 bgl_tour
 json_spirit_test
-Makefile.bak
-boost_mpi_test
-graph_test

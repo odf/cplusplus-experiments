@@ -3,7 +3,7 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "thunk.hpp"
+#include "Thunk.hpp"
 
 namespace odf
 {
