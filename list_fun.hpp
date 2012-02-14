@@ -32,8 +32,8 @@ L mapList(const L src, const F fun)
     else
     {
         return makeList(fun(src.first()),
-                        curry2(compose(mapList<L, F>, getRest<L>),
-                               src, fun));
+                        curry(compose(mapList<L, F>, getRest<L>),
+                              src, fun));
     }
 }
 
@@ -47,11 +47,11 @@ L zipLists(const L lft, const L rgt, const F fun)
     else
     {
         return makeList(fun(lft.first(), rgt.first()),
-                        curry2(compose(curry(compose(zipLists<L, F>,
-                                                     getRest<L>),
+                        curry(compose(curry(compose(zipLists<L, F>,
+                                                    getRest<L>),
                                              lft),
-                                       getRest<L>),
-                               rgt, fun));
+                                      getRest<L>),
+                              rgt, fun));
     }
 }
 
@@ -95,8 +95,8 @@ L filterList(const L src, const F pred)
     else
     {
         return makeList(p.first(),
-                        curry2(compose(filterList<L, F>, getRest<L>),
-                               p, pred));
+                        curry(compose(filterList<L, F>, getRest<L>),
+                              p, pred));
     }
 }
 
@@ -110,8 +110,8 @@ L takeList(const L list, const int n)
     else
     {
         return makeList(list.first(),
-                        curry2(compose(takeList<L>, getRest<L>),
-                               list, n-1));
+                        curry(compose(takeList<L>, getRest<L>),
+                              list, n-1));
     }
 }
 
@@ -162,9 +162,28 @@ List<typename Iter::value_type> asList(Iter iter, const Iter end)
 }
 
 template<typename C>
-List<typename C::value_type> asList(const C& collection)
+inline List<typename C::value_type> asList(const C& collection)
 {
     return asList(collection.begin(), collection.end());
+}
+
+template<typename T>
+List<T> arraySlice(const T a[], const int from, const int to)
+{
+    if (from >= to)
+    {
+        return List<T>();
+    }
+    else
+    {
+        return makeList(a[from], curry(arraySlice<T>, a, from+1, to));
+    }
+}
+
+template<typename T, std::size_t N>
+inline List<T> asList(const T(&a)[N])
+{
+    return arraySlice<T>(a, 0, N);
 }
 
 }

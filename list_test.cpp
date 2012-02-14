@@ -26,16 +26,27 @@ bool isOdd(const int n)
 
 List<Integer> fibonacci(const Integer a, const Integer b)
 {
-    return makeList(a, curry2(fibonacci, b, a + b));
+    return makeList(a, curry(fibonacci, b, a + b));
 }
+
+template<typename T, std::size_t N>
+inline std::size_t length(const T(&)[N])
+{
+    return N;
+}
+
 
 int main()
 {
+    double a[] = { 3.14, 2.72, 1.23 };
     List<int> three = makeList(3, makeList(2, makeList(1)));
     List<int> four  = makeList(4, (three.*(&List<int>::rest))());
 
     cout << three << endl;
     cout << four << endl;
+
+    cout << arraySlice(a, 1, length(a)) << endl;
+    cout << asList(a) << endl;
 
     forEach(three, print);
     cout << endl;
