@@ -59,25 +59,25 @@ L zipLists(const L lft, const L rgt, const F fun)
 template<typename L>
 L operator+(const L lft, const L rgt)
 {
-    return zipLists(lft, rgt, std::plus<typename L::element_type>());
+    return zipLists(lft, rgt, std::plus<typename L::value_type>());
 }
 
 template<typename L>
 L operator-(const L lft, const L rgt)
 {
-    return zipLists(lft, rgt, std::minus<typename L::element_type>());
+    return zipLists(lft, rgt, std::minus<typename L::value_type>());
 }
 
 template<typename L>
 L operator*(const L lft, const L rgt)
 {
-    return zipLists(lft, rgt, std::multiplies<typename L::element_type>());
+    return zipLists(lft, rgt, std::multiplies<typename L::value_type>());
 }
 
 template<typename L>
 L operator/(const L lft, const L rgt)
 {
-    return zipLists(lft, rgt, std::divides<typename L::element_type>());
+    return zipLists(lft, rgt, std::divides<typename L::value_type>());
 }
 
 template<typename L, typename F>

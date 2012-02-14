@@ -22,7 +22,7 @@ private:
     T first_;
 
 public:
-    typedef T element_type;
+    typedef T value_type;
 
     List() :
         next_(),
