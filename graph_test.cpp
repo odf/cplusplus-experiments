@@ -6,6 +6,9 @@
 
 using namespace odf;
 
+using std::cout;
+using std::endl;
+
 int main()
 {
     typedef std::pair<int, int> E;
@@ -14,7 +17,11 @@ int main()
 
     Graph<int> G(asList(edges));
 
-    std::cout << G.vertices() << std::endl;
+    cout << "Graph has " << G.nvertices() << " vertices:" << endl;
+    cout << G.vertices() << endl << endl;
+
+    cout << "Graph has " << G.nedges() << " edges:" << endl;
+    //cout << G.edges() << endl << endl;
 }
 
 /*

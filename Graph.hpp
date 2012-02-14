@@ -6,24 +6,29 @@
 #include <boost/tuple/tuple.hpp>
 
 #include "List.hpp"
+#include "fun.hpp"
 #include "list_fun.hpp"
 
 
 namespace odf
 {
 
+using std::pair;
 using boost::unordered_set;
 using boost::unordered_map;
-using std::pair;
 using boost::tie;
 
 template<typename T>
 class Graph
 {
 private:
-    unordered_set<T>                    verts_;
-    unordered_map<T, unordered_set<T> > forw_;
-    unordered_map<T, unordered_set<T> > back_;
+    typedef unordered_set<T>                          vertex_collection_type;
+    typedef unordered_map<T, vertex_collection_type > adj_lists_map_type;
+    typedef pair<T, vertex_collection_type >          adj_lists_item_type;
+
+    vertex_collection_type verts_;
+    adj_lists_map_type     forw_;
+    adj_lists_map_type     back_;
 
 public:
     typedef T          vertex_type;
@@ -73,6 +78,11 @@ public:
     const List<vertex_type> vertices() const
     {
         return asList(verts_);
+    }
+
+    const int nedges() const
+    {
+        return 0;
     }
 };
 
