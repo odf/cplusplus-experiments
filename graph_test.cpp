@@ -33,21 +33,28 @@ void printEach(const List<T> list)
     cout << endl;
 }
 
+template<typename T>
+void printGraph(const Graph<T> G)
+{
+    cout << "  vertices: " << G.vertices() << endl;
+    cout << "  edges:    " << G.edges() << endl;
+}
+
+
 int main()
 {
     typedef std::pair<int, int> E;
 
     E edges[] = { E(1, 2), E(1, 3), E(2, 4), E(3, 4), E(4, 5) };
-
     Graph<int> G(asList(edges));
 
-    cout << endl;
-    cout << "Graph has " << G.nrVertices() << " vertices:" << endl;
-    cout << G.vertices() << endl;
+    cout << endl << "Original graph:" << endl;
+    printGraph(G);
 
-    cout << endl;
-    cout << "Graph has " << G.nrEdges() << " edges:" << endl;
-    cout << G.edges() << endl;
+    G.removeEdge(4, 5);
+
+    cout << endl << "After removing edge (4,5):" << endl;
+    printGraph(G);
 }
 
 /*

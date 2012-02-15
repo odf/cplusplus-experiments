@@ -85,6 +85,15 @@ public:
         }
     }
 
+    void removeEdge(const T& from, const T& to)
+    {
+        if (forw_.count(from) > 0 and forw_.at(from).count(to) > 0)
+        {
+            forw_[from].erase(to);
+            back_[to].erase(from);
+        }
+    }
+
     int nrVertices() const
     {
         return verts_.size();
