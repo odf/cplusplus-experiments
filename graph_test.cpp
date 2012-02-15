@@ -8,6 +8,17 @@ using namespace odf;
 
 using std::cout;
 using std::endl;
+using std::pair;
+
+namespace odf {
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const pair<T, T>& edge)
+{
+    out << "(" << edge.first << "," << edge.second << ")";
+}
+
+}
 
 template<typename T>
 void print(const T val)
@@ -30,14 +41,13 @@ int main()
 
     Graph<int> G(asList(edges));
 
+    cout << endl;
     cout << "Graph has " << G.nrVertices() << " vertices:" << endl;
-    cout << G.vertices() << endl << endl;
+    cout << G.vertices() << endl;
 
-    cout << "Neighbor lists:" << endl;
-    printEach(mapList(G.vertices(), curry(&Graph<int>::neighbors, G)));
-
+    cout << endl;
     cout << "Graph has " << G.nrEdges() << " edges:" << endl;
-    //cout << G.edges() << endl << endl;
+    cout << G.edges() << endl;
 }
 
 /*

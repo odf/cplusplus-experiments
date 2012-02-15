@@ -19,6 +19,13 @@ using boost::unordered_map;
 using boost::tie;
 
 template<typename T>
+pair<T, T> makeEdge(const T v, const T w)
+{
+    return pair<T, T>(v, w);
+}
+
+
+template<typename T>
 class Graph
 {
 private:
@@ -98,9 +105,19 @@ public:
         return asList(forw_.at(v));
     }
 
+    List<edge_type> incidences(const T& v) const
+    {
+        return mapList(neighbors(v), curry(makeEdge<T>, v));
+    }
+
     int nrEdges() const
     {
         return sum(mapList(vertices(), curry(&Graph::nrNeighbors, *this)));
+    }
+
+    List<edge_type> edges() const
+    {
+        return flatMap(vertices(), curry(&Graph::incidences, *this));
     }
 };
 
