@@ -33,13 +33,12 @@ template<typename T>
 class Graph
 {
 private:
-    typedef unordered_set<T>                          vertex_collection_type;
-    typedef unordered_map<T, vertex_collection_type > adj_lists_map_type;
-    typedef pair<T, vertex_collection_type >          adj_lists_item_type;
+    typedef unordered_set<T>                    vertex_collection;
+    typedef unordered_map<T, vertex_collection> neighbor_map;
 
-    vertex_collection_type verts_;
-    adj_lists_map_type     forw_;
-    adj_lists_map_type     back_;
+    vertex_collection verts_;
+    neighbor_map      forw_;
+    neighbor_map      back_;
 
 public:
     typedef T          vertex_type;
@@ -99,11 +98,11 @@ public:
         verts_.insert(v);
         if (forw_.count(v) == 0)
         {
-            forw_[v] = vertex_collection_type();
+            forw_[v] = vertex_collection();
         }
         if (back_.count(v) == 0)
         {
-            back_[v] = vertex_collection_type();
+            back_[v] = vertex_collection();
         }
 
         return *this;
