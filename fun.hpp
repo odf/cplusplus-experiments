@@ -238,15 +238,18 @@ template<class K, typename F>
 struct binaryMemberFunctor : ternaryFunctor<F>
 {
     typename function_traits<F>::result_type typedef result_type;
-    typename function_traits<F>::arg2_type   typedef A;
-    typename function_traits<F>::arg3_type   typedef B;
+    typedef  K                                       arg1_type;
+    typename function_traits<F>::arg2_type   typedef arg2_type;
+    typename function_traits<F>::arg3_type   typedef arg3_type;
 
     binaryMemberFunctor(const F fun) :
         fun(fun)
     {
     }
 
-    const result_type operator() (K& obj, const A arg1, const B arg2) const
+    const result_type operator() (K& obj,
+                                  const arg2_type arg1,
+                                  const arg3_type arg2) const
     {
         return ((obj).*(fun))(arg1, arg2);
     }
@@ -265,15 +268,18 @@ template<class K, typename F>
 struct binaryConstMemberFunctor : ternaryFunctor<F>
 {
     typename function_traits<F>::result_type typedef result_type;
-    typename function_traits<F>::arg2_type   typedef A;
-    typename function_traits<F>::arg3_type   typedef B;
+    typedef  K                                       arg1_type;
+    typename function_traits<F>::arg2_type   typedef arg2_type;
+    typename function_traits<F>::arg3_type   typedef arg3_type;
 
     binaryConstMemberFunctor(const F fun) :
         fun(fun)
     {
     }
 
-    const result_type operator() (K& obj, const A arg1, const B arg2) const
+    const result_type operator() (K& obj,
+                                  const arg2_type arg1,
+                                  const arg3_type arg2) const
     {
         return ((obj).*(fun))(arg1, arg2);
     }
