@@ -36,8 +36,8 @@ void printEach(const List<T> list)
 template<typename T>
 void printGraph(const Graph<T> G)
 {
-    cout << "  vertices: " << G.vertices() << endl;
-    cout << "  edges:    " << G.edges() << endl;
+    cout << "  " << G.nrVertices() << " vertices: " << G.vertices() << endl;
+    cout << "  " << G.nrEdges()    << " edges:    " << G.edges() << endl;
 }
 
 
@@ -51,15 +51,17 @@ int main()
     cout << endl << "Original graph:" << endl;
     printGraph(G);
 
-    G.removeEdge(4, 5);
+    cout << endl << "Without vertex 2:" << endl;
+    printGraph(Graph<int>(G).removeVertex(2));
 
-    cout << endl << "After removing edge (4,5):" << endl;
-    printGraph(G);
+    cout << endl << "Without (nonexistent) vertex 6:" << endl;
+    printGraph(Graph<int>(G).removeVertex(6));
 
-    G.removeVertex(2);
+    cout << endl << "Without edge (4,5):" << endl;
+    printGraph(Graph<int>(G).removeEdge(4, 5));
 
-    cout << endl << "After removing vertex 2:" << endl;
-    printGraph(G);
+    cout << endl << "Without (nonexistent) edge (3,5):" << endl;
+    printGraph(Graph<int>(G).removeEdge(3, 5));
 }
 
 /*

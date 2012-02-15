@@ -70,15 +70,17 @@ public:
         }
     }
 
-    void addEdge(const T& from, const T& to)
+    Graph& addEdge(const T& from, const T& to)
     {
         addVertex(from);
         addVertex(to);
         forw_[from].insert(to);
         back_[to].insert(from);
+
+        return *this;
     }
 
-    void addVertex(const T& v)
+    Graph& addVertex(const T& v)
     {
         verts_.insert(v);
         if (forw_.count(v) == 0)
@@ -89,29 +91,42 @@ public:
         {
             back_[v] = vertex_collection_type();
         }
+
+        return *this;
     }
 
-    void removeEdge(const T& from, const T& to)
+    Graph& removeEdge(const T& from, const T& to)
     {
         if (forw_.count(from) > 0 and forw_.at(from).count(to) > 0)
         {
             forw_[from].erase(to);
             back_[to].erase(from);
         }
+
+        return *this;
     }
 
-    void removeEdge(const edge_type& e)
+    Graph& removeEdge(const edge_type& e)
     {
         removeEdge(e.first, e.second);
+
+        return *this;
     }
 
-    void removeVertex(const T& v)
+    Graph& removeVertex(const T& v)
     {
-        for (List<edge_type> p = incidences(v)); not p.isEmpty(); p = p.rest())
+        if (verts_.count(v) > 0)
         {
-            removeEdge(p.first());
+            for (List<edge_type> p = concat(edgesFrom(v), edgesTo(v));
+                 not p.isEmpty();
+                 p = p.rest())
+            {
+                removeEdge(p.first());
+            }
+            verts_.erase(v);
         }
-        verts_.erase(v);
+
+        return *this;
     }
 
     int nrVertices() const
@@ -137,7 +152,7 @@ public:
     int nrPredecessors(const T& v) const
     {
         return back_.at(v).size();
-    };
+    }
 
     List<vertex_type> predecessors(const T& v) const
     {
@@ -153,10 +168,6 @@ public:
     {
         return mapList(predecessors(v), curry(makeReverseEdge<T>, v));
     }
-
-    List<edge_type> incidences(const T& v) const
-    {
-        return concat(edgesFrom(v), edgesTo(v));
 
     int nrEdges() const
     {
