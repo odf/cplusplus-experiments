@@ -24,6 +24,12 @@ pair<T, T> makeEdge(const T v, const T w)
     return pair<T, T>(v, w);
 }
 
+template<typename T>
+pair<T, T> makeReverseEdge(const T v, const T w)
+{
+    return pair<T, T>(w, v);
+}
+
 
 template<typename T>
 class Graph
@@ -94,6 +100,20 @@ public:
         }
     }
 
+    void removeEdge(const edge_type& e)
+    {
+        removeEdge(e.first, e.second);
+    }
+
+    void removeVertex(const T& v)
+    {
+        for (List<edge_type> p = incidences(v)); not p.isEmpty(); p = p.rest())
+        {
+            removeEdge(p.first());
+        }
+        verts_.erase(v);
+    }
+
     int nrVertices() const
     {
         return verts_.size();
@@ -104,29 +124,48 @@ public:
         return asList(verts_);
     }
 
-    int nrNeighbors(const T& v) const
+    int nrSuccessors(const T& v) const
     {
         return forw_.at(v).size();
     };
 
-    List<vertex_type> neighbors(const T& v) const
+    List<vertex_type> successors(const T& v) const
     {
         return asList(forw_.at(v));
     }
 
+    int nrPredecessors(const T& v) const
+    {
+        return back_.at(v).size();
+    };
+
+    List<vertex_type> predecessors(const T& v) const
+    {
+        return asList(back_.at(v));
+    }
+
+    List<edge_type> edgesFrom(const T& v) const
+    {
+        return mapList(successors(v), curry(makeEdge<T>, v));
+    }
+
+    List<edge_type> edgesTo(const T& v) const
+    {
+        return mapList(predecessors(v), curry(makeReverseEdge<T>, v));
+    }
+
     List<edge_type> incidences(const T& v) const
     {
-        return mapList(neighbors(v), curry(makeEdge<T>, v));
-    }
+        return concat(edgesFrom(v), edgesTo(v));
 
     int nrEdges() const
     {
-        return sum(mapList(vertices(), curry(&Graph::nrNeighbors, *this)));
+        return sum(mapList(vertices(), curry(&Graph::nrSuccessors, *this)));
     }
 
     List<edge_type> edges() const
     {
-        return flatMap(vertices(), curry(&Graph::incidences, *this));
+        return flatMap(vertices(), curry(&Graph::edgesFrom, *this));
     }
 };
 

@@ -55,6 +55,11 @@ int main()
 
     cout << endl << "After removing edge (4,5):" << endl;
     printGraph(G);
+
+    G.removeVertex(2);
+
+    cout << endl << "After removing vertex 2:" << endl;
+    printGraph(G);
 }
 
 /*
