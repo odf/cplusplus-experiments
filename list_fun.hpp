@@ -9,7 +9,7 @@ namespace odf
 {
 
 template<typename T>
-List<T> listFrom(const T& start)
+List<T> listFrom(const T start)
 {
     return makeList(start, curry(listFrom<T>, start + 1));
 }
@@ -53,7 +53,7 @@ inline List<T> asList(const T(&a)[N])
 }
 
 template<typename L, typename F>
-inline void forEach(const L& list, const F& f)
+inline void forEach(const L& list, const F f)
 {
     for (L p = list; !p.isEmpty(); p = p.rest())
     {
@@ -180,7 +180,7 @@ L reverseList(const L& list)
 
 template<typename L, typename F>
 typename L::value_type reduceList(const L& list,
-                                  const typename L::value_type& init,
+                                  const typename L::value_type init,
                                   const F combine)
 {
     typename L::value_type result = init;
