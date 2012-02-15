@@ -78,7 +78,7 @@ public:
         }
     }
 
-    const int nrVertices() const
+    int nrVertices() const
     {
         return verts_.size();
     }
@@ -88,12 +88,12 @@ public:
         return asList(verts_);
     }
 
-    const int nrNeighbors(const T v) const
+    int nrNeighbors(const T v) const
     {
         return forw_.at(v).size();
     };
 
-    const int nrEdges() const
+    int nrEdges() const
     {
         return sum(mapList(vertices(), curry(&Graph::nrNeighbors, *this)));
     }

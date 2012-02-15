@@ -50,7 +50,7 @@ public:
         return first_;
     }
     
-    const bool isEmpty() const
+    bool isEmpty() const
     {
         return is_empty_;
     }
@@ -67,7 +67,7 @@ public:
         }
     }
 
-    const bool operator==(const List& other) const
+    bool operator==(const List& other) const
     {
         return first_ == other.first_ and next_ == other.next_;
     }
@@ -142,7 +142,7 @@ class ListIterator
         list_ = list_.rest();
     }
 
-    const bool equal(const ListIterator& other) const
+    bool equal(const ListIterator& other) const
     {
         return this->list_ == other.list_;
     }

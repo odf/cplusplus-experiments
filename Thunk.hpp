@@ -118,7 +118,7 @@ public:
         return content_->operator()();
     }
 
-    const bool isEmpty() const
+    bool isEmpty() const
     {
         return content_.get() == 0;
     }
