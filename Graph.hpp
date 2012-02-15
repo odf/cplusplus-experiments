@@ -3,7 +3,6 @@
 
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include "List.hpp"
 #include "fun.hpp"
@@ -16,7 +15,6 @@ namespace odf
 using std::pair;
 using boost::unordered_set;
 using boost::unordered_map;
-using boost::tie;
 
 template<typename T>
 pair<T, T> makeEdge(const T v, const T w)
@@ -53,9 +51,7 @@ public:
     {
         for(; iter != end; ++iter)
         {
-            T from, to;
-            tie(from, to) = *iter;
-            addEdge(from, to);
+            addEdge(*iter);
         }
     }
 
@@ -64,9 +60,7 @@ public:
     {
         for(List<edge_type> p = edges; not p.isEmpty(); p = p.rest())
         {
-            T from, to;
-            tie(from, to) = p.first();
-            addEdge(from, to);
+            addEdge(p.first());
         }
     }
 
@@ -93,6 +87,11 @@ public:
         back_[to].insert(from);
 
         return *this;
+    }
+
+    Graph& addEdge(const edge_type& e)
+    {
+        return addEdge(e.first, e.second);
     }
 
     Graph& addVertex(const T& v)
