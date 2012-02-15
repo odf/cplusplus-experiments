@@ -626,6 +626,18 @@ inline typename function_traits<F>::wrapper_type method(const F fun)
     return function_traits<F>::wrap(fun);
 }
 
+template<typename T>
+T identity(const T val)
+{
+    return val;
+}
+
+template<typename T>
+inline typename function_traits<T(*)(T)>::currier_type constant(const T val)
+{
+    return curry(identity<T>, val);
+}
+
 }
 
 #endif // !ODF_FUN_HPP

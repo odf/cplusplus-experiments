@@ -62,11 +62,11 @@ inline void forEach(const L list, const Functor f)
 }
 
 template<typename L, typename F>
-L mapList(const L src, const F fun)
+List<typename function_traits<F>::result_type> mapList(const L src, const F fun)
 {
     if (src.isEmpty())
     {
-        return src;
+        return List<typename function_traits<F>::result_type>();
     }
     else
     {
@@ -208,6 +208,48 @@ template<typename L>
 typename L::value_type product(const L list)
 {
     return reduceList(list, std::multiplies<typename L::value_type>());
+}
+
+template<typename L, typename F>
+L lazyConcat(const L a, const F b)
+{
+    if (a.isEmpty())
+    {
+        return b();
+    }
+    else
+    {
+        return makeList(a.first(),
+                        curry(compose(lazyConcat<L, F>, &L::rest), a, b));
+    }
+}
+
+template<typename L>
+inline L concat(const L a, const L b)
+{
+    return lazyConcat(a, constant(b));
+}
+
+template<typename L>
+typename L::value_type flatten(const L list)
+{
+    if (list.isEmpty())
+    {
+        return typename L::value_type();
+    }
+    else
+    {
+        return lazyConcat<typename L::value_type>(
+            list.first(),
+            curry(compose(flatten<L>, &L::rest), list));
+    }
+}
+
+template<typename L, typename F>
+inline typename function_traits<F>::result_type
+flatMap(const L list, const F fun)
+{
+    return flatten(mapList(list, fun));
 }
 
 }

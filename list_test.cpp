@@ -9,9 +9,17 @@
 using namespace std;
 using namespace odf;
 
-void print(const int val)
+template<typename T>
+void print(const T val)
 {
     cout << "<" << val << ">";
+}
+
+template<typename T>
+void printEach(const List<T> list)
+{
+    forEach(list, print<T>);
+    cout << endl;
 }
 
 template<typename T>
@@ -36,6 +44,11 @@ inline std::size_t length(const T(&)[N])
     return N;
 }
 
+List<int> listUpto(const int n)
+{
+    return takeList(listFrom(1), n);
+}
+
 
 int main()
 {
@@ -46,15 +59,18 @@ int main()
     cout << three << endl;
     cout << four << endl;
 
+    cout << concat(three, four) << endl;
+
+    printEach(three);
+    printEach(mapList(four, listUpto));
+    printEach(flatMap(four, listUpto));
+
     cout << arraySlice(a, 1, length(a)) << endl;
     cout << asList(a) << endl;
     cout << reduceList(asList(a), mul<double>) << endl;
     cout << sum(asList(a)) << endl;
 
-    forEach(three, print);
-    cout << endl;
-
-    std::for_each(four.begin(), four.end(), print);
+    std::for_each(four.begin(), four.end(), print<int>);
     cout << endl;
 
     cout << mapList(four, compose(curry(mul<int>, 2), curry(mul<int>, 3)))
