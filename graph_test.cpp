@@ -9,6 +9,19 @@ using namespace odf;
 using std::cout;
 using std::endl;
 
+template<typename T>
+void print(const T val)
+{
+    cout << "<" << val << ">";
+}
+
+template<typename T>
+void printEach(const List<T> list)
+{
+    forEach(list, print<T>);
+    cout << endl;
+}
+
 int main()
 {
     typedef std::pair<int, int> E;
@@ -19,6 +32,9 @@ int main()
 
     cout << "Graph has " << G.nrVertices() << " vertices:" << endl;
     cout << G.vertices() << endl << endl;
+
+    cout << "Neighbor lists:" << endl;
+    printEach(mapList(G.vertices(), curry(&Graph<int>::neighbors, G)));
 
     cout << "Graph has " << G.nrEdges() << " edges:" << endl;
     //cout << G.edges() << endl << endl;

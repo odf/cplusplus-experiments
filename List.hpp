@@ -45,7 +45,7 @@ public:
     {
     }
 
-    const T first() const
+    T first() const
     {
         return first_;
     }
@@ -55,7 +55,7 @@ public:
         return is_empty_;
     }
 
-    const List rest() const
+    List rest() const
     {
         if (next_.isEmpty())
         {

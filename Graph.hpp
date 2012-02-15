@@ -46,7 +46,7 @@ public:
         }
     }
 
-    explicit Graph(const List<edge_type> edges) :
+    explicit Graph(const List<edge_type>& edges) :
         verts_(), forw_(), back_()
     {
         for(List<edge_type> p = edges; not p.isEmpty(); p = p.rest())
@@ -57,7 +57,7 @@ public:
         }
     }
 
-    void addEdge(const T from, const T to)
+    void addEdge(const T& from, const T& to)
     {
         addVertex(from);
         addVertex(to);
@@ -65,7 +65,7 @@ public:
         back_[to].insert(from);
     }
 
-    void addVertex(const T v)
+    void addVertex(const T& v)
     {
         verts_.insert(v);
         if (forw_.count(v) == 0)
@@ -83,15 +83,20 @@ public:
         return verts_.size();
     }
 
-    const List<vertex_type> vertices() const
+    List<vertex_type> vertices() const
     {
         return asList(verts_);
     }
 
-    int nrNeighbors(const T v) const
+    int nrNeighbors(const T& v) const
     {
         return forw_.at(v).size();
     };
+
+    List<vertex_type> neighbors(const T& v) const
+    {
+        return asList(forw_.at(v));
+    }
 
     int nrEdges() const
     {

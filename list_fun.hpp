@@ -9,7 +9,7 @@ namespace odf
 {
 
 template<typename T>
-List<T> listFrom(const T start)
+List<T> listFrom(const T& start)
 {
     return makeList(start, curry(listFrom<T>, start + 1));
 }
@@ -34,7 +34,7 @@ inline List<typename C::value_type> asList(const C& collection)
 }
 
 template<typename T>
-List<T> arraySlice(const T a[], const int from, const int to)
+List<T> arraySlice(T const a[], const int from, const int to)
 {
     if (from >= to)
     {
@@ -52,8 +52,8 @@ inline List<T> asList(const T(&a)[N])
     return arraySlice<T>(a, 0, N);
 }
 
-template<typename L, typename Functor>
-inline void forEach(const L list, const Functor f)
+template<typename L, typename F>
+inline void forEach(const L& list, const F& f)
 {
     for (L p = list; !p.isEmpty(); p = p.rest())
     {
@@ -62,7 +62,8 @@ inline void forEach(const L list, const Functor f)
 }
 
 template<typename L, typename F>
-List<typename function_traits<F>::result_type> mapList(const L src, const F fun)
+List<typename function_traits<F>::result_type>
+mapList(const L& src, const F fun)
 {
     if (src.isEmpty())
     {
@@ -76,7 +77,7 @@ List<typename function_traits<F>::result_type> mapList(const L src, const F fun)
 }
 
 template<typename L, typename F>
-L zipLists(const L lft, const L rgt, const F fun)
+L zipLists(const L& lft, const L& rgt, const F fun)
 {
     if (lft.isEmpty() or rgt.isEmpty())
     {
@@ -93,31 +94,31 @@ L zipLists(const L lft, const L rgt, const F fun)
 }
 
 template<typename L>
-L operator+(const L lft, const L rgt)
+L operator+(const L& lft, const L& rgt)
 {
     return zipLists(lft, rgt, std::plus<typename L::value_type>());
 }
 
 template<typename L>
-L operator-(const L lft, const L rgt)
+L operator-(const L& lft, const L& rgt)
 {
     return zipLists(lft, rgt, std::minus<typename L::value_type>());
 }
 
 template<typename L>
-L operator*(const L lft, const L rgt)
+L operator*(const L& lft, const L& rgt)
 {
     return zipLists(lft, rgt, std::multiplies<typename L::value_type>());
 }
 
 template<typename L>
-L operator/(const L lft, const L rgt)
+L operator/(const L& lft, const L& rgt)
 {
     return zipLists(lft, rgt, std::divides<typename L::value_type>());
 }
 
 template<typename L, typename F>
-L filterList(const L src, const F pred)
+L filterList(const L& src, const F pred)
 {
     L p = src;
     while (not (p.isEmpty() or pred(p.first())))
@@ -137,7 +138,7 @@ L filterList(const L src, const F pred)
 }
 
 template<typename L>
-L takeList(const L list, const int n)
+L takeList(const L& list, const int n)
 {
     if (list.isEmpty() or n <= 0)
     {
@@ -151,7 +152,7 @@ L takeList(const L list, const int n)
 }
 
 template<typename L>
-L dropList(const L list, const int n)
+L dropList(const L& list, const int n)
 {
     L p = list;
     int i = n;
@@ -165,7 +166,7 @@ L dropList(const L list, const int n)
 }
 
 template<typename L>
-L reverseList(const L list)
+L reverseList(const L& list)
 {
     L result;
 
@@ -178,8 +179,8 @@ L reverseList(const L list)
 }
 
 template<typename L, typename F>
-typename L::value_type reduceList(const L list,
-                                  const typename L::value_type init,
+typename L::value_type reduceList(const L& list,
+                                  const typename L::value_type& init,
                                   const F combine)
 {
     typename L::value_type result = init;
@@ -193,25 +194,25 @@ typename L::value_type reduceList(const L list,
 }
 
 template<typename L, typename F>
-typename L::value_type reduceList(const L list, const F combine)
+typename L::value_type reduceList(const L& list, const F combine)
 {
     return reduceList(list.rest(), list.first(), combine);
 }
 
 template<typename L>
-typename L::value_type sum(const L list)
+typename L::value_type sum(const L& list)
 {
     return reduceList(list, std::plus<typename L::value_type>());
 }
 
 template<typename L>
-typename L::value_type product(const L list)
+typename L::value_type product(const L& list)
 {
     return reduceList(list, std::multiplies<typename L::value_type>());
 }
 
 template<typename L, typename F>
-L lazyConcat(const L a, const F b)
+L lazyConcat(const L& a, const F b)
 {
     if (a.isEmpty())
     {
@@ -225,13 +226,13 @@ L lazyConcat(const L a, const F b)
 }
 
 template<typename L>
-inline L concat(const L a, const L b)
+inline L concat(const L& a, const L& b)
 {
     return lazyConcat(a, constant(b));
 }
 
 template<typename L>
-typename L::value_type flatten(const L list)
+typename L::value_type flatten(const L& list)
 {
     if (list.isEmpty())
     {
@@ -247,7 +248,7 @@ typename L::value_type flatten(const L list)
 
 template<typename L, typename F>
 inline typename function_traits<F>::result_type
-flatMap(const L list, const F fun)
+flatMap(const L& list, const F fun)
 {
     return flatten(mapList(list, fun));
 }
