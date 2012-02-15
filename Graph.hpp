@@ -70,6 +70,21 @@ public:
         }
     }
 
+    bool hasVertex(const T& v) const
+    {
+        return verts_.count(v) > 0;
+    }
+
+    bool hasEdge(const T& from, const T& to) const
+    {
+        return hasVertex(from) and forw_.at(from).count(to) > 0;
+    }
+
+    bool hasEdge(const edge_type& e)
+    {
+        return hasEdge(e.first, e.second);
+    }
+
     Graph& addEdge(const T& from, const T& to)
     {
         addVertex(from);
@@ -97,7 +112,7 @@ public:
 
     Graph& removeEdge(const T& from, const T& to)
     {
-        if (forw_.count(from) > 0 and forw_.at(from).count(to) > 0)
+        if (hasEdge(from, to))
         {
             forw_[from].erase(to);
             back_[to].erase(from);
@@ -108,14 +123,12 @@ public:
 
     Graph& removeEdge(const edge_type& e)
     {
-        removeEdge(e.first, e.second);
-
-        return *this;
+        return removeEdge(e.first, e.second);
     }
 
     Graph& removeVertex(const T& v)
     {
-        if (verts_.count(v) > 0)
+        if (hasVertex(v))
         {
             for (List<edge_type> p = concat(edgesFrom(v), edgesTo(v));
                  not p.isEmpty();
