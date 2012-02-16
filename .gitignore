@@ -5,3 +5,4 @@ graph_test
 boost_mpi_test
 bgl_tour
 json_spirit_test
+distributed_graph

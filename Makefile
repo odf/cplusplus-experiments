@@ -1,19 +1,26 @@
 CXXFLAGS = -g -O3 -I$(HOME)/include
-PROGRAMS = list_test graph_test boost_mpi_test bgl_tour json_spirit_test
+PROGRAMS = list_test graph_test boost_mpi_test distributed_graph
 
-list_test:	list_test.o
+list_test:		list_test.o
 	$(CXX) $(CXXFLAGS) list_test.o -o list_test -lgmp -lm
 	./list_test
 
-graph_test:	graph_test.o
-	$(CXX) $(CXXFLAGS) graph_test.o -o graph_test -lgmp -lm
+graph_test:		graph_test.o
+	$(CXX) $(CXXFLAGS) graph_test.o -o graph_test
 	./graph_test
 
-boost_mpi_test.o: boost_mpi_test.cpp
+boost_mpi_test.o: 	boost_mpi_test.cpp
 	mpic++ $(CXXFLAGS) -c boost_mpi_test.cpp -o boost_mpi_test.o
 
-boost_mpi_test: boost_mpi_test.o
+boost_mpi_test: 	boost_mpi_test.o
 	mpic++ $(CXXFLAGS) boost_mpi_test.o -o boost_mpi_test \
+	  -lboost_mpi-mt -lboost_serialization-mt
+
+distributed_graph.o:	distributed_graph.cpp
+	mpic++ $(CXXFLAGS) -c distributed_graph.cpp -o distributed_graph.o
+
+distributed_graph:	distributed_graph.o
+	mpic++ $(CXXFLAGS) distributed_graph.o -o distributed_graph \
 	  -lboost_mpi-mt -lboost_serialization-mt
 
 json_spirit_test: json_spirit_test.o
