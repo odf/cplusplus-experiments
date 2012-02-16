@@ -1,12 +1,23 @@
-#include <boost/mpi.hpp>
 #include <iostream>
 
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/mpi.hpp>
+
 #include "List.hpp"
+#include "fun.hpp"
 #include "list_fun.hpp"
 #include "Graph.hpp"
 
 namespace mpi = boost::mpi;
 using namespace odf;
+
+using std::cout;
+using std::endl;
+using std::pair;
+using boost::unordered_set;
+using boost::unordered_map;
+
 
 List<int>
 sizeSequence(int total, int parts, int carry)
@@ -21,6 +32,28 @@ splitSizes(int total, int parts)
     return takeList(sizeSequence(total, parts, 0), parts);
 }
 
+template<typename T>
+pair<T, T> makePair(const T& a, const T& b)
+{
+    return pair<T, T>(a, b);
+}
+
+template<typename T, typename F>
+pair<typename function_traits<F>::result_type,
+     typename function_traits<F>::result_type>
+mapPair(const F fun, const pair<T, T>& p)
+{
+    return makePair(fun(p.first), fun(p.second));
+}
+
+template<typename T, typename F>
+Graph<typename function_traits<F>::result_type>
+mapGraph(const Graph<T>& graph, const F fun)
+{
+    return Graph<typename function_traits<F>::result_type>(
+        mapList(graph.edges(), curry(mapPair<T, F>, fun)));
+}
+
 Graph<int> makeGraph()
 {
     typedef Graph<int>::edge_type E;
@@ -28,17 +61,6 @@ Graph<int> makeGraph()
 
     return Graph<int>(asList(edges));
 }
-
-// template<typename T>
-// List<Graph<T> > splitGraph(const Graph<T>& graph, int n)
-// {
-//     int N = graph.nrVertices();
-
-//     return splitGraph(graph, graph.vertices(), n, N, 0);
-// }
-
-using std::cout;
-using std::endl;
 
 
 int main(int argc, char* argv[])

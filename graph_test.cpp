@@ -1,3 +1,5 @@
+#include <string>
+#include <sstream>
 #include <iostream>
 #include <utility>
 
@@ -40,6 +42,34 @@ void printGraph(const Graph<T> G)
     cout << "  " << G.nrEdges()    << " edges:    " << G.edges() << endl;
 }
 
+template<typename T>
+pair<T, T> makePair(const T& a, const T& b)
+{
+    return pair<T, T>(a, b);
+}
+
+template<typename T, typename F>
+pair<typename function_traits<F>::result_type,
+     typename function_traits<F>::result_type>
+mapPair(const F fun, const pair<T, T>& p)
+{
+    return makePair(fun(p.first), fun(p.second));
+}
+
+template<typename T, typename F>
+Graph<typename function_traits<F>::result_type>
+mapGraph(const Graph<T>& graph, const F fun)
+{
+    return Graph<typename function_traits<F>::result_type>(
+        mapList(graph.edges(), curry(mapPair<T, F>, fun)));
+}
+
+std::string asString(int n)
+{
+    std::stringstream ss;
+    ss << "-" << n << "-";
+    return ss.str();
+}
 
 int main()
 {
@@ -62,6 +92,9 @@ int main()
 
     cout << endl << "Without (nonexistent) edge (3,5):" << endl;
     printGraph(Graph<int>(G).removeEdge(3, 5));
+
+    cout << endl << "With vertices mapped to strings:" << endl;
+    printGraph(mapGraph(G, asString));
 }
 
 /*
