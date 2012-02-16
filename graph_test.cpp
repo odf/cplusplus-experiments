@@ -42,26 +42,24 @@ void printGraph(const Graph<T> G)
     cout << "  " << G.nrEdges()    << " edges:    " << G.edges() << endl;
 }
 
-template<typename T>
-pair<T, T> makePair(const T& a, const T& b)
-{
-    return pair<T, T>(a, b);
-}
-
-template<typename T, typename F>
-pair<typename function_traits<F>::result_type,
-     typename function_traits<F>::result_type>
-mapPair(const F fun, const pair<T, T>& p)
-{
-    return makePair(fun(p.first), fun(p.second));
-}
-
 template<typename T, typename F>
 Graph<typename function_traits<F>::result_type>
 mapGraph(const Graph<T>& graph, const F fun)
 {
-    return Graph<typename function_traits<F>::result_type>(
-        mapList(graph.edges(), curry(mapPair<T, F>, fun)));
+    Graph<typename function_traits<F>::result_type> mapped;
+
+    for (List<pair<T, T> > q = graph.edges(); not q.isEmpty(); q = q.rest())
+    {
+        pair<T, T> e = q.first();
+        mapped.addEdge(fun(e.first), fun(e.second));
+    }
+
+    for (List<T> p = graph.vertices(); not p.isEmpty(); p = p.rest())
+    {
+        mapped.addVertex(fun(p.first()));
+    }
+
+    return mapped;
 }
 
 std::string asString(int n)
@@ -90,11 +88,11 @@ int main()
     cout << endl << "Without edge (4,5):" << endl;
     printGraph(Graph<int>(G).removeEdge(4, 5));
 
+    cout << endl << "As before with vertices mapped to strings:" << endl;
+    printGraph(mapGraph(Graph<int>(G).removeEdge(4, 5), asString));
+
     cout << endl << "Without (nonexistent) edge (3,5):" << endl;
     printGraph(Graph<int>(G).removeEdge(3, 5));
-
-    cout << endl << "With vertices mapped to strings:" << endl;
-    printGraph(mapGraph(G, asString));
 }
 
 /*

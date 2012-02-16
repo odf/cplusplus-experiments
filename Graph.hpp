@@ -44,6 +44,11 @@ public:
     typedef T          vertex_type;
     typedef pair<T, T> edge_type;
 
+    Graph() :
+        verts_(), forw_(), back_()
+    {
+    }
+
     template<class Iterator>
     explicit Graph(Iterator iter, const Iterator end) :
         verts_(), forw_(), back_()
