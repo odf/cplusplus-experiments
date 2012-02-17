@@ -6,49 +6,47 @@
 
 namespace boost { namespace serialization {
 
-template<typename G, class Archive>
-void save(Archive& ar, const G& graph, const unsigned int version)
+template<typename T, class Archive>
+void save(Archive& ar, const odf::Graph<T>& graph, const unsigned int version)
 {
+    odf::List<T> p, q;
     const int n = graph.nrVertices();
     ar & n;
 
-    for (odf::List<typename G::vertex_type> p = graph.vertices();
-         not p.isEmpty();
-         p = p.rest())
+    for (p = graph.vertices(); not p.isEmpty(); p = p.rest())
     {
-        const typename G::vertex_type v = p.first();
+        const T v = p.first();
         const int m = graph.nrSuccessors(v);
 
         ar & v;
         ar & m;
 
-        for (odf::List<typename G::vertex_type> q = graph.successors(v);
-             not q.isEmpty();
-             q = q.rest())
+        for (q = graph.successors(v); not q.isEmpty(); q = q.rest())
         {
-            const typename G::vertex_type w = q.first();
+            const T w = q.first();
             ar & w;
         }
     }
 }
 
-template<typename G, class Archive>
-void load(Archive& ar, G& graph, const unsigned int version)
+template<typename T, class Archive>
+void load(Archive& ar, odf::Graph<T>& graph, const unsigned int version)
 {
     int n;
     ar & n;
 
     for (int i = 0; i < n; ++i)
     {
-        typename G::vertex_type v;
+        T v;
         int m;
         ar & v;
         ar & m;
 
         graph.addVertex(v);
+
         for (int j = 0; j < m; ++j)
         {
-            typename G::vertex_type w;
+            T w;
             ar & w;
             graph.addEdge(v, w);
         }
