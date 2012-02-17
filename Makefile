@@ -35,11 +35,13 @@ distclean:	clean
 	rm -f $(PROGRAMS)
 
 depend:
-	makedepend -Y. list_test.cpp graph_test.cpp
+	makedepend -Y. list_test.cpp graph_test.cpp distributed_graph.cpp
 
 # DO NOT DELETE
 
-list_test.o: Integer.h shared_array.hpp List.hpp Thunk.hpp nullstream.hpp fun.hpp
-list_test.o: list_fun.hpp
-graph_test.o: Graph.hpp List.hpp Thunk.hpp nullstream.hpp list_fun.hpp
-graph_test.o: fun.hpp
+list_test.o: Integer.h shared_array.hpp List.hpp Thunk.hpp nullstream.hpp
+list_test.o: fun.hpp list_fun.hpp
+graph_test.o: list_fun.hpp List.hpp Thunk.hpp nullstream.hpp fun.hpp
+graph_test.o: Graph.hpp
+distributed_graph.o: List.hpp Thunk.hpp nullstream.hpp fun.hpp list_fun.hpp
+distributed_graph.o: Graph.hpp
