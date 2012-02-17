@@ -19,6 +19,16 @@ using boost::unordered_set;
 using boost::unordered_map;
 
 
+namespace odf {
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const pair<T, T>& edge)
+{
+    out << "(" << edge.first << "," << edge.second << ")";
+}
+
+}
+
 template<typename T>
 void print(const T val)
 {
@@ -31,6 +41,14 @@ void printEach(const List<T> list)
     forEach(list, print<T>);
     cout << endl;
 }
+
+template<typename T>
+void printGraph(const Graph<T> G)
+{
+    cout << "  " << G.nrVertices() << " vertices: " << G.vertices() << endl;
+    cout << "  " << G.nrEdges()    << " edges:    " << G.edges() << endl;
+}
+
 
 List<int>
 sizeSequence(int total, int parts, int carry)
@@ -89,6 +107,32 @@ unordered_map<T, int> numberingForPartition(const List<List<T> >& parts)
     return result;
 }
 
+template<typename T>
+Graph<T> extendedSubgraph(const Graph<T>& graph, const List<T>& vertices)
+{
+    Graph<T> result;
+    List<T> p, q;
+
+    for (p = vertices; not p.isEmpty(); p = p.rest())
+    {
+        const T v = p.first();
+        if (graph.hasVertex(v))
+        {
+            result.addVertex(v);
+            for (q = graph.successors(v); not q.isEmpty(); q = q.rest())
+            {
+                result.addEdge(v, q.first());
+            }
+            for (q = graph.predecessors(v); not q.isEmpty(); q = q.rest())
+            {
+                result.addEdge(q.first(), v);
+            }
+        }
+    }
+
+    return result;
+}
+
 Graph<int> makeGraph()
 {
     typedef Graph<int>::edge_type E;
@@ -114,11 +158,20 @@ int main(int argc, char* argv[])
     {
         G = makeGraph();
         N = G.nrVertices();
-        printEach(sizesForPartition(N, k));
         List<List<int> > partition = partitionList(G.vertices(), N, k);
-        printEach(partition);
-
         assignment = numberingForPartition(partition);
+
+        List<List<int> > p = partition;
+        for (int i = 0; i < k; ++i)
+        {
+            List<int> verts = p.first();
+
+            cout << "Subgraph " << i << ":" << endl;
+            cout << "  (owned vertices: " << verts << ")" << endl;
+            printGraph(extendedSubgraph(G, verts));
+            cout << endl;
+            p = p.rest();
+        }
     }
 }
 
