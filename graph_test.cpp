@@ -3,8 +3,12 @@
 #include <iostream>
 #include <utility>
 
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+
 #include "list_fun.hpp"
 #include "Graph.hpp"
+#include "graph_serialization.hpp"
 
 using namespace odf;
 
@@ -93,6 +97,17 @@ int main()
 
     cout << endl << "Without (nonexistent) edge (3,5):" << endl;
     printGraph(Graph<int>(G).removeEdge(3, 5));
+
+    std::stringstream ss;
+    boost::archive::text_oarchive oa(ss);
+    oa << G;
+    cout << endl << ss.str() << endl;
+
+    Graph<int> H;
+    boost::archive::text_iarchive ia(ss);
+    ia >> H;
+    cout << endl << "Restored graph after serialization round trip:" << endl;
+    printGraph(H);
 }
 
 /*
