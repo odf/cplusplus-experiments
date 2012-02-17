@@ -19,6 +19,19 @@ using boost::unordered_set;
 using boost::unordered_map;
 
 
+template<typename T>
+void print(const T val)
+{
+    cout << "<" << val << ">";
+}
+
+template<typename T>
+void printEach(const List<T> list)
+{
+    forEach(list, print<T>);
+    cout << endl;
+}
+
 List<int>
 sizeSequence(int total, int parts, int carry)
 {
@@ -27,29 +40,53 @@ sizeSequence(int total, int parts, int carry)
 }
 
 List<int>
-splitSizes(int total, int parts)
+sizesForPartition(int total, int parts)
 {
     return takeList(sizeSequence(total, parts, 0), parts);
 }
 
-template<typename T, typename F>
-Graph<typename function_traits<F>::result_type>
-mapGraph(const Graph<T>& graph, const F fun)
+template<typename T>
+List<List<T> > partitionList(const List<T> source, const List<int> sizes)
 {
-    Graph<typename function_traits<F>::result_type> mapped;
-
-    for (List<pair<T, T> > q = graph.edges(); not q.isEmpty(); q = q.rest())
+    if (source.isEmpty())
     {
-        pair<T, T> e = q.first();
-        mapped.addEdge(fun(e.first), fun(e.second));
+        return List<List<T> >();
+    }
+    else if (sizes.isEmpty())
+    {
+        return makeList(source);
+    }
+    else
+    {
+        const int k = sizes.first();
+        return makeList(takeList(source, k),
+                        curry(partitionList<T>,
+                              dropList(source, k), sizes.rest()));
+    }
+}
+
+template<typename T>
+List<List<T> > partitionList(const List<T>& source, int total, int parts)
+{
+    return partitionList(source, sizesForPartition(total, parts));
+}
+
+template<typename T>
+unordered_map<T, int> numberingForPartition(const List<List<T> >& parts)
+{
+    unordered_map<T, int> result;
+    int i = 0;
+
+    for (List<List<T> > p = parts; not p.isEmpty(); p = p.rest())
+    {
+        for (List<T> q = p.first(); not q.isEmpty(); q = q.rest())
+        {
+            result[q.first()] = i;
+        }
+        ++i;
     }
 
-    for (List<T> p = graph.vertices(); not p.isEmpty(); p = p.rest())
-    {
-        mapped.addVertex(fun(p.first()));
-    }
-
-    return mapped;
+    return result;
 }
 
 Graph<int> makeGraph()
@@ -63,30 +100,25 @@ Graph<int> makeGraph()
 
 int main(int argc, char* argv[])
 {
-    int rank;
+    int rank, k, N;
+    unordered_map<int, int> assignment;
+    Graph<int> G;
 
     mpi::environment env(argc, argv);
     mpi::communicator world;
 
     rank = world.rank();
+    k = world.size();
 
     if (rank == 0)
     {
-        int total;
-        List<int> sizes;
+        G = makeGraph();
+        N = G.nrVertices();
+        printEach(sizesForPartition(N, k));
+        List<List<int> > partition = partitionList(G.vertices(), N, k);
+        printEach(partition);
 
-        std::cout << "Enter a size: " << std::endl;
-        std::cin >> total;
-
-        sizes = splitSizes(total, world.size());
-        cout << "Sizes: " << sizes << endl;
-        cout << "Total: " << sum(sizes) << endl;
-
-        //List<Graph<int> > p = splitGraph(makeGraph(world.size()));
-
-        //for (int i = 0; not p.isEmpty(); p = p.rest())
-        //{
-        //}
+        assignment = numberingForPartition(partition);
     }
 }
 
