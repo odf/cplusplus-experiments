@@ -63,7 +63,7 @@ inline void forEach(const L& list, const F f)
 
 template<typename L, typename F>
 List<typename function_traits<F>::result_type>
-mapList(const L& src, const F fun)
+mapList(const L src, const F fun)
 {
     if (src.isEmpty())
     {
@@ -77,7 +77,7 @@ mapList(const L& src, const F fun)
 }
 
 template<typename L, typename F>
-L zipLists(const L& lft, const L& rgt, const F fun)
+L zipLists(const L lft, const L rgt, const F fun)
 {
     if (lft.isEmpty() or rgt.isEmpty())
     {
@@ -118,7 +118,7 @@ L operator/(const L& lft, const L& rgt)
 }
 
 template<typename L, typename F>
-L filterList(const L& src, const F pred)
+L filterList(const L src, const F pred)
 {
     L p = src;
     while (not (p.isEmpty() or pred(p.first())))
@@ -138,7 +138,7 @@ L filterList(const L& src, const F pred)
 }
 
 template<typename L>
-L takeList(const L& list, const int n)
+L takeList(const L list, const int n)
 {
     if (list.isEmpty() or n <= 0)
     {
@@ -152,7 +152,7 @@ L takeList(const L& list, const int n)
 }
 
 template<typename L>
-L dropList(const L& list, const int n)
+L dropList(const L list, const int n)
 {
     L p = list;
     int i = n;
@@ -212,7 +212,7 @@ typename L::value_type product(const L& list)
 }
 
 template<typename L, typename F>
-L lazyConcat(const L& a, const F b)
+L lazyConcat(const L a, const F b)
 {
     if (a.isEmpty())
     {
@@ -226,13 +226,13 @@ L lazyConcat(const L& a, const F b)
 }
 
 template<typename L>
-inline L concat(const L& a, const L& b)
+inline L concat(const L a, const L b)
 {
     return lazyConcat(a, constant(b));
 }
 
 template<typename L>
-typename L::value_type flatten(const L& list)
+typename L::value_type flatten(const L list)
 {
     if (list.isEmpty())
     {
