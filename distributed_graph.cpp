@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
@@ -8,6 +9,7 @@
 #include "fun.hpp"
 #include "list_fun.hpp"
 #include "Graph.hpp"
+#include "graph_serialization.hpp"
 
 namespace mpi = boost::mpi;
 using namespace odf;
@@ -15,9 +17,11 @@ using namespace odf;
 using std::cout;
 using std::endl;
 using std::pair;
+using std::ostream;
+using std::string;
+using std::stringstream;
 using boost::unordered_set;
 using boost::unordered_map;
-
 
 namespace odf {
 
@@ -30,23 +34,11 @@ std::ostream& operator<<(std::ostream& out, const pair<T, T>& edge)
 }
 
 template<typename T>
-void print(const T val)
+ostream& operator<<(ostream& out, const Graph<T>& G)
 {
-    cout << "<" << val << ">";
-}
-
-template<typename T>
-void printEach(const List<T> list)
-{
-    forEach(list, print<T>);
-    cout << endl;
-}
-
-template<typename T>
-void printGraph(const Graph<T> G)
-{
-    cout << "  " << G.nrVertices() << " vertices: " << G.vertices() << endl;
-    cout << "  " << G.nrEdges()    << " edges:    " << G.edges() << endl;
+    out << "  " << G.nrVertices() << " vertices: " << G.vertices() << endl;
+    out << "  " << G.nrEdges()    << " edges:    " << G.edges() << endl;
+    return out;
 }
 
 
@@ -146,7 +138,7 @@ int main(int argc, char* argv[])
 {
     int rank, k, N;
     unordered_map<int, int> assignment;
-    Graph<int> G;
+    Graph<int> G, H;
 
     mpi::environment env(argc, argv);
     mpi::communicator world;
@@ -158,20 +150,29 @@ int main(int argc, char* argv[])
     {
         G = makeGraph();
         N = G.nrVertices();
-        List<List<int> > partition = partitionList(G.vertices(), N, k);
+        List<List<int> > partition = partitionList(G.vertices(), N, k - 1);
         assignment = numberingForPartition(partition);
 
+        int i;
         List<List<int> > p = partition;
-        for (int i = 0; i < k; ++i)
+        for (i = 1; i < k; ++i, p = p.rest())
         {
-            List<int> verts = p.first();
-
-            cout << "Subgraph " << i << ":" << endl;
-            cout << "  (owned vertices: " << verts << ")" << endl;
-            printGraph(extendedSubgraph(G, verts));
-            cout << endl;
-            p = p.rest();
+            world.send(i, 0, extendedSubgraph<int>(G, p.first()));
         }
+
+        string result;
+        for (i = 1; i < k; ++i)
+        {
+            world.recv(i, 1, result);
+            cout << result;
+        }
+    }
+    else
+    {
+        world.recv(0, 0, H);
+        stringstream ss;
+        ss << "Graph received by process " << rank << ":" << endl << H << endl;
+        world.send(0, 1, ss.str());
     }
 }
 
