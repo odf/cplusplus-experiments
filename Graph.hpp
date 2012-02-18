@@ -68,6 +68,12 @@ public:
         }
     }
 
+    Graph& operator=(Graph other)
+    {
+        other.swap(*this);
+        return *this;
+    }
+
     bool hasVertex(const T& v) const
     {
         return verts_.count(v) > 0;
@@ -194,6 +200,16 @@ public:
     {
         return flatMap(vertices(), curry(&Graph::edgesFrom, *this));
     }
+
+private:
+
+    void swap (Graph &g) throw () // non-throwing swap
+    {
+        std::swap(this->verts_, g.verts_);
+        std::swap(this->forw_,  g.forw_);
+        std::swap(this->back_,  g.back_);
+    }
+
 };
 
 }
