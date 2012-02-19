@@ -108,7 +108,7 @@ Graph<T> extendedSubgraph(const Graph<T>& graph, const List<T>& vertices)
         flatMap(good_vertices, curry(&Graph<T>::edgesFrom, graph)),
         flatMap(good_vertices, curry(&Graph<T>::edgesTo, graph)));
 
-    return Graph<T>(good_vertices, edges);
+    return Graph<T>(edges, good_vertices);
 }
 
 Graph<int> makeGraph()

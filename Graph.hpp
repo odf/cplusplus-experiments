@@ -59,17 +59,8 @@ public:
         }
     }
 
-    explicit Graph(const List<edge_type>& edges) :
-        verts_(), forw_(), back_()
-    {
-        for(List<edge_type> p = edges; not p.isEmpty(); p = p.rest())
-        {
-            addEdge(p.first());
-        }
-    }
-
-    explicit Graph(const List<vertex_type>& vertices,
-                   const List<edge_type>& edges) :
+    explicit Graph(const List<edge_type>& edges,
+                   const List<vertex_type>& vertices = List<vertex_type>()) :
         verts_(), forw_(), back_()
     {
         for (List<vertex_type> vl = vertices; not vl.isEmpty(); vl = vl.rest())
