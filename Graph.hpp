@@ -68,6 +68,20 @@ public:
         }
     }
 
+    explicit Graph(const List<vertex_type>& vertices,
+                   const List<edge_type>& edges) :
+        verts_(), forw_(), back_()
+    {
+        for (List<vertex_type> vl = vertices; not vl.isEmpty(); vl = vl.rest())
+        {
+            addVertex(vl.first());
+        }
+        for (List<edge_type> el = edges; not el.isEmpty(); el = el.rest())
+        {
+            addEdge(el.first());
+        }
+    }
+
     Graph& operator=(Graph other)
     {
         other.swap(*this);
