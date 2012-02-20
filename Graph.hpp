@@ -28,6 +28,12 @@ pair<T, T> makeReverseEdge(const T v, const T w)
     return pair<T, T>(w, v);
 }
 
+template<typename T>
+bool notLoop(const pair<T,T> e)
+{
+    return e.first != e.second;
+}
+
 
 template<typename T>
 class Graph
@@ -189,6 +195,11 @@ public:
     List<edge_type> edgesTo(const T& v) const
     {
         return mapList(predecessors(v), curry(makeReverseEdge<T>, v));
+    }
+
+    List<edge_type> incidences(const T& v) const
+    {
+        return concat(edgesFrom(v), filterList(edgesTo(v), notLoop<T>));
     }
 
     int nrEdges() const
