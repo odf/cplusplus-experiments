@@ -25,6 +25,36 @@ using boost::unordered_map;
 
 namespace odf {
 
+template<class G>
+struct GraphDelegate
+{
+    GraphDelegate(const G graph) :
+        nrVertices(&G::nrVertices, graph),
+        vertices(&G::vertices, graph),
+        incidences(&G::incidences, graph)
+    {
+    }
+
+    typename G::vertex_type typedef vertex_type;
+    typename G::edge_type   typedef edge_type;
+
+private:
+    typedef int (G::*nrVerticesFunc)() const;
+    typedef List<vertex_type> (G::*verticesFunc)() const;
+    typedef List<edge_type> (G::*incidencesFunc)(const vertex_type&) const;
+
+public:
+    typename currierTraits<nrVerticesFunc>::result_type nrVertices;
+    typename currierTraits<verticesFunc>::result_type   vertices;
+    typename currierTraits<incidencesFunc>::result_type incidences;
+};
+
+template<class G>
+inline GraphDelegate<G> delegate(const G graph)
+{
+    return GraphDelegate<G>(graph);
+}
+
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const pair<T, T>& edge)
 {
@@ -82,13 +112,16 @@ List<List<T> > partitionList(const List<T> source, int total, int parts)
 }
 
 template<typename G>
-G extendedSubgraph(const G graph, const List<typename G::vertex_type> vertices)
+Graph<typename G::vertex_type> extendedSubgraph(
+    const G graph, const List<typename G::vertex_type> vertices)
 {
-    return G(flatMap(vertices, curry(&G::incidences, graph)), vertices);
+    return Graph<typename G::vertex_type>(
+        flatMap(vertices, graph.incidences), vertices);
 }
 
 template<typename G>
-List<G> graphPartition(const G graph, const int parts)
+List<Graph<typename G::vertex_type> > graphPartition(
+    const G graph, const int parts)
 {
     return mapList(partitionList(graph.vertices(), graph.nrVertices(), parts),
                    curry(extendedSubgraph<G>, graph));
@@ -137,7 +170,7 @@ int main(int argc, char* argv[])
     {
         int i = 0;
 
-        for (List<Graph<int> > p = graphPartition(makeGraph(), k-1);
+        for (List<Graph<int> > p = graphPartition(delegate(makeGraph()), k-1);
              not p.isEmpty();
              p = p.rest())
         {
