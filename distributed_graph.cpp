@@ -75,8 +75,8 @@ ostream& operator<<(ostream& out, const Graph<T>& G)
 List<int>
 sizeSequence(int total, int parts, int carry)
 {
-    return makeList((carry + total) / parts,
-                    curry(sizeSequence, total, parts, (carry + total) % parts));
+    int sum = carry + total;
+    return makeList(sum / parts, curry(sizeSequence, total, parts, sum % parts));
 }
 
 List<int>
