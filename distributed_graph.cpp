@@ -102,13 +102,10 @@ unordered_map<T, int> numberingForPartition(const List<List<T> >& parts)
 template<typename T>
 Graph<T> extendedSubgraph(const Graph<T>& graph, const List<T>& vertices)
 {
-    List<T> good_vertices =
-        filterList(vertices, curry(&Graph<T>::hasVertex, graph));
-    List<typename Graph<T>::edge_type> edges = concat(
-        flatMap(good_vertices, curry(&Graph<T>::edgesFrom, graph)),
-        flatMap(good_vertices, curry(&Graph<T>::edgesTo, graph)));
-
-    return Graph<T>(edges, good_vertices);
+    return Graph<T>(concat(
+                        flatMap(vertices, curry(&Graph<T>::edgesFrom, graph)),
+                        flatMap(vertices, curry(&Graph<T>::edgesTo, graph))),
+                    vertices);
 }
 
 Graph<int> makeGraph()
