@@ -79,21 +79,6 @@ public:
         return *this;
     }
 
-    bool hasVertex(const T& v) const
-    {
-        return verts_.count(v) > 0;
-    }
-
-    bool hasEdge(const T& from, const T& to) const
-    {
-        return hasVertex(from) and forw_.at(from).count(to) > 0;
-    }
-
-    bool hasEdge(const edge_type& e)
-    {
-        return hasEdge(e.first, e.second);
-    }
-
     Graph& addEdge(const T& from, const T& to)
     {
         addVertex(from);
@@ -154,6 +139,16 @@ public:
         }
 
         return *this;
+    }
+
+    bool hasVertex(const T& v) const
+    {
+        return verts_.count(v) > 0;
+    }
+
+    bool hasEdge(const T& from, const T& to) const
+    {
+        return hasVertex(from) and forw_.at(from).count(to) > 0;
     }
 
     int nrVertices() const
