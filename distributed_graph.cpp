@@ -76,13 +76,26 @@ List<List<T> > partitionList(const List<T> source, const List<int> sizes)
 }
 
 template<typename T>
-List<List<T> > partitionList(const List<T>& source, int total, int parts)
+List<List<T> > partitionList(const List<T> source, int total, int parts)
 {
     return partitionList(source, sizesForPartition(total, parts));
 }
 
+template<typename G>
+G extendedSubgraph(const G graph, const List<typename G::vertex_type> vertices)
+{
+    return G(flatMap(vertices, curry(&G::incidences, graph)), vertices);
+}
+
+template<typename G>
+List<G> graphPartition(const G graph, const int parts)
+{
+    return mapList(partitionList(graph.vertices(), graph.nrVertices(), parts),
+                   curry(extendedSubgraph<G>, graph));
+}
+
 template<typename T>
-unordered_map<T, int> numberingForPartition(const List<List<T> >& parts)
+unordered_map<T, int> numberingForPartition(const List<List<T> > parts)
 {
     unordered_map<T, int> result;
     int i = 0;
@@ -99,13 +112,6 @@ unordered_map<T, int> numberingForPartition(const List<List<T> >& parts)
     return result;
 }
 
-template<typename T>
-Graph<T> extendedSubgraph(const Graph<T>& graph, const List<T>& vertices)
-{
-    return Graph<T>(flatMap(vertices, curry(&Graph<T>::incidences, graph)),
-                    vertices);
-}
-
 Graph<int> makeGraph()
 {
     typedef Graph<int>::edge_type E;
@@ -117,9 +123,9 @@ Graph<int> makeGraph()
 
 int main(int argc, char* argv[])
 {
-    int rank, k, N;
+    int rank, k;
     unordered_map<int, int> assignment;
-    Graph<int> G, H;
+    Graph<int> H;
 
     mpi::environment env(argc, argv);
     mpi::communicator world;
@@ -129,16 +135,13 @@ int main(int argc, char* argv[])
 
     if (rank == 0)
     {
-        G = makeGraph();
-        N = G.nrVertices();
-        List<List<int> > partition = partitionList(G.vertices(), N, k - 1);
-        assignment = numberingForPartition(partition);
+        int i = 0;
 
-        int i;
-        List<List<int> > p = partition;
-        for (i = 1; i < k; ++i, p = p.rest())
+        for (List<Graph<int> > p = graphPartition(makeGraph(), k-1);
+             not p.isEmpty();
+             p = p.rest())
         {
-            world.send(i, 0, extendedSubgraph<int>(G, p.first()));
+            world.send(++i, 0, p.first());
         }
 
         string result;
