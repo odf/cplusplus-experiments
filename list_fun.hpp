@@ -200,6 +200,19 @@ typename L::value_type reduceList(const L& list, const F combine)
 }
 
 template<typename L>
+size_t lengthList(const L& list)
+{
+    size_t count = 0;
+
+    for (L p = list; !p.isEmpty(); p = p.rest())
+    {
+        ++count;
+    }
+
+    return count;
+}
+
+template<typename L>
 typename L::value_type sum(const L& list)
 {
     return reduceList(list, std::plus<typename L::value_type>());

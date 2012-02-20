@@ -64,6 +64,7 @@ int main()
     printEach(three);
     printEach(mapList(four, listUpto));
     printEach(flatMap(four, listUpto));
+    cout << lengthList(flatMap(four, listUpto)) << endl;
 
     cout << arraySlice(a, 1, length(a)) << endl;
     cout << asList(a) << endl;
