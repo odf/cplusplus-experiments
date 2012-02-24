@@ -46,22 +46,20 @@ void printGraph(const Graph<T> G)
     cout << "  " << G.nrEdges()    << " edges:    " << G.edges() << endl;
 }
 
-template<typename T, typename F>
-pair<typename function_traits<F>::result_type,
-     typename function_traits<F>::result_type>
-mapPair(const F fun, const pair<T,T> p)
+template<typename G, typename F>
+typename Graph<typename function_traits<F>::result_type>::edge_type
+mapEdge(const F fun, const typename G::edge_type e)
 {
-    return pair<typename function_traits<F>::result_type,
-                typename function_traits<F>::result_type>
-        (fun(p.first), fun(p.second));
+    return typename Graph<typename function_traits<F>::result_type>
+        ::edge_type(fun(e.first), fun(e.second));
 }
 
-template<typename T, typename F>
+template<typename G, typename F>
 Graph<typename function_traits<F>::result_type>
-mapGraph(const Graph<T>& graph, const F fun)
+mapGraph(const G& graph, const F fun)
 {
     return Graph<typename function_traits<F>::result_type>(
-        mapList(graph.edges(), curry(mapPair<T,F>, fun)),
+        mapList(graph.edges(), curry(mapEdge<G,F>, fun)),
         mapList(graph.vertices(), fun));
 }
 
