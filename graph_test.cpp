@@ -47,23 +47,22 @@ void printGraph(const Graph<T> G)
 }
 
 template<typename T, typename F>
+pair<typename function_traits<F>::result_type,
+     typename function_traits<F>::result_type>
+mapPair(const F fun, const pair<T,T> p)
+{
+    return pair<typename function_traits<F>::result_type,
+                typename function_traits<F>::result_type>
+        (fun(p.first), fun(p.second));
+}
+
+template<typename T, typename F>
 Graph<typename function_traits<F>::result_type>
 mapGraph(const Graph<T>& graph, const F fun)
 {
-    Graph<typename function_traits<F>::result_type> mapped;
-
-    for (List<pair<T, T> > q = graph.edges(); not q.isEmpty(); q = q.rest())
-    {
-        pair<T, T> e = q.first();
-        mapped.addEdge(fun(e.first), fun(e.second));
-    }
-
-    for (List<T> p = graph.vertices(); not p.isEmpty(); p = p.rest())
-    {
-        mapped.addVertex(fun(p.first()));
-    }
-
-    return mapped;
+    return Graph<typename function_traits<F>::result_type>(
+        mapList(graph.edges(), curry(mapPair<T,F>, fun)),
+        mapList(graph.vertices(), fun));
 }
 
 std::string asString(int n)
