@@ -1,5 +1,5 @@
 CXXFLAGS = -g -O3 -I$(HOME)/include
-PROGRAMS = list_test graph_test boost_mpi_test distributed_graph
+PROGRAMS = list_test hash_trie_test graph_test boost_mpi_test distributed_graph
 
 list_test:		list_test.o
 	$(CXX) $(CXXFLAGS) list_test.o -o list_test -lgmp -lm
@@ -35,13 +35,15 @@ distclean:	clean
 	rm -f $(PROGRAMS)
 
 depend:
-	makedepend -Y. list_test.cpp graph_test.cpp distributed_graph.cpp
+	makedepend -Y. list_test.cpp hash_trie_test.cpp graph_test.cpp \
+	distributed_graph.cpp
 
 # DO NOT DELETE
 
 list_test.o: Integer.h shared_array.hpp List.hpp Thunk.hpp nullstream.hpp
 list_test.o: fun.hpp list_fun.hpp
+hash_trie_test.o: hash_trie.hpp
 graph_test.o: list_fun.hpp List.hpp Thunk.hpp nullstream.hpp fun.hpp
 graph_test.o: Graph.hpp graph_serialization.hpp
 distributed_graph.o: List.hpp Thunk.hpp nullstream.hpp fun.hpp list_fun.hpp
-distributed_graph.o: Graph.hpp
+distributed_graph.o: Graph.hpp graph_serialization.hpp

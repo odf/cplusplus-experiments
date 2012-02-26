@@ -6,3 +6,4 @@ boost_mpi_test
 bgl_tour
 json_spirit_test
 distributed_graph
+hash_trie_test
