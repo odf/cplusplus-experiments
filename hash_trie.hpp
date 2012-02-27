@@ -9,8 +9,8 @@ namespace odf
 {
 namespace hash_trie
 {
-typedef uint32_t      key_type;
-typedef unsigned char index_type;
+typedef uint32_t key_type;
+typedef uint8_t  index_type;
 
 key_type mask(const key_type n, const index_type shift)
 {
