@@ -18,11 +18,13 @@ typedef uint8_t  indexType;
 // Bit counting and manipulation functions.
 // --------------------------------------------------------------------
 
+inline
 keyType mask(keyType const n, indexType const shift)
 {
     return (n >> shift) & 0x1f;
 }
 
+inline
 indexType bitCount(keyType n)
 {
     n -= (n >> 1) & 0x55555555;
@@ -32,11 +34,13 @@ indexType bitCount(keyType n)
     return (n + (n >> 16)) & 0x3f;
 }
 
+inline
 indexType indexForBit(keyType const bitmap, keyType const bit)
 {
     return bitCount(bitmap & (bit - 1));
 }
 
+inline
 keyType maskBit(keyType const n, indexType const shift)
 {
     return 1 << mask(n, shift);
@@ -48,6 +52,7 @@ keyType maskBit(keyType const n, indexType const shift)
 // --------------------------------------------------------------------
 
 template<typename T>
+inline
 T const* const arrayWith(T const* const source, int const len,
                          int const pos, T const val)
 {
@@ -58,6 +63,7 @@ T const* const arrayWith(T const* const source, int const len,
 }
 
 template<typename T>
+inline
 T const* const arrayWithInsertion(T const* const source, int const len,
                                   int const pos, T const val)
 {
@@ -69,6 +75,7 @@ T const* const arrayWithInsertion(T const* const source, int const len,
 }
 
 template<typename T>
+inline
 T const* const arrayWithout(T const* const source, int const len,
                             int const pos)
 {
