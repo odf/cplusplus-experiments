@@ -1,6 +1,7 @@
 /* -*-c++-*- */
 
 #include <cassert>
+#include <iostream>
 
 #include "hash_trie.hpp"
 
@@ -23,4 +24,30 @@ int main()
     assert(indexForBit(0x01010101, 0x01000000) == 3);
     assert(indexForBit(0x01010101, 0x00010000) == 2);
     assert(indexForBit(0xffffffff, 0x00040000) == 18);
+
+    int a[] = { 0, 1, 2, 3 };
+    for (int k = 0; k < 4; ++k)
+    {
+        const int* b = arrayWith(a, 4, k, 5);
+        const int* c = arrayWithInsertion(a, 4, k, 5);
+        const int* d = arrayWithout(a, 4, k);
+
+        for (int i = 0; i < 4; ++i)
+        {
+            assert(a[i] == i);
+            assert(b[i] == ((i == k) ? 5 : i));
+        }
+
+        for (int i = 0; i < 5; ++i)
+        {
+            assert(c[i] == ((i < k) ? i : (i == k) ? 5 : i - 1));
+        }
+
+        for (int i = 0; i < 3; ++i)
+        {
+            assert(d[i] == ((i < k) ? i : i + 1));
+        }
+    }
+
+    std::cout << "Everything seems okay." << std::endl;
 }
