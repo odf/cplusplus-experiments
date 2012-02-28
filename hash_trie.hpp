@@ -342,6 +342,71 @@ class ArrayNode : public Node<Key, Val>
             return ValPtr();
     }
 
+    NodePtr insert(NodePtr   const self,
+                   indexType const shift,
+                   hashType  const hash,
+                   LeafPtr   const leaf) const
+    {
+        indexType i = masked(hash, shift);
+        if (progeny_[i].get() != 0)
+        {
+            NodePtr node = progeny_[i]->insert(progeny_[i], shift+5, hash, leaf);
+            size_t newSize = size() + node->size() - progeny_[i]->size();
+            return NodePtr(new ArrayNode(arrayWith(progeny_, i, node),
+                                         newSize));
+        }
+        else
+        {
+            return NodePtr(new ArrayNode(arrayWith(progeny_, i, leaf),
+                                         size() + 1));
+        }
+    }
+
+    NodePtr erase(NodePtr   const self,
+                  indexType const shift,
+                  hashType  const hash,
+                  Key       const key) const
+    {
+        indexType i = masked(hash, shift);
+        NodePtr node = progeny_[i]->erase(progeny_[i], shift+5, hash, key);
+        if (node.get() != 0)
+        {
+            return NodePtr(new ArrayNode(arrayWith(progeny_, i, node),
+                                         size() - 1));
+        }
+        else
+        {
+            indexType count = 0;
+            for (indexType j = 0; j < 32; ++j)
+            {
+                if (j != i and progeny_[j].get() != 0)
+                    ++count;
+            }
+            if (count <= 4)
+            {
+                NodePtr* remaining = new NodePtr[count];
+                hashType bitmap = 0;
+                indexType k = 0;
+                for (indexType j = 0; j < 32; ++j)
+                {
+                    if (j != i and progeny_[j].get() != 0)
+                    {
+                        bitmap |= 1 << j;
+                        remaining[k] = progeny_[j];
+                        ++k;
+                    }
+                }
+                return NodePtr(new BitmappedNode<Key, Val>(
+                                   bitmap, remaining, size() - 1));
+            }
+            else
+            {
+                return NodePtr(new ArrayNode(arrayWith(progeny_, i, NodePtr()),
+                                             size() - 1));
+            }
+        }
+    }
+        
 private:
     NodePtr const* progeny_;
     size_t const size_;
