@@ -43,7 +43,7 @@ typedef uint8_t  indexType;
 // ----------------------------------------------------------------------------
 
 inline
-hashType mask(hashType const n, indexType const shift)
+indexType masked(hashType const n, indexType const shift)
 {
     return (n >> shift) & 0x1f;
 }
@@ -67,7 +67,7 @@ indexType indexForBit(hashType const bitmap, hashType const bit)
 inline
 hashType maskBit(hashType const n, indexType const shift)
 {
-    return 1 << mask(n, shift);
+    return 1 << masked(n, shift);
 }
 
 
@@ -232,7 +232,7 @@ class CollisionNode : public Node<Key, Val>
     {
     }
 
-    size_t size() const { bucket_.size(); }
+    size_t size() const { return bucket_.size(); }
 
     ValPtr get(indexType const shift,
                hashType  const hash,
@@ -305,6 +305,46 @@ private:
         }
         return result;
     }
+};
+
+// ----------------------------------------------------------------------------
+// An array node provides room for up to 32 child nodes with direct access
+// ----------------------------------------------------------------------------
+
+template<typename Key, typename Val>
+class ArrayNode : public Node<Key, Val>
+{
+    typename Node<Key, Val>::ValPtr  typedef ValPtr;
+    typename Node<Key, Val>::NodePtr typedef NodePtr;
+    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
+
+    ArrayNode(NodePtr const* progeny, size_t const size)
+        : progeny_(progeny),
+          size_(size)
+    {
+    }
+
+    ~ArrayNode()
+    {
+        delete[] progeny_;
+    }
+
+    size_t size() const { return size_; }
+
+    ValPtr get(indexType const shift,
+               hashType  const hash,
+               Key       const key) const
+    {
+        indexType i = masked(hash, shift);
+        if (progeny_[i].get() != 0)
+            return progeny_[i]->get(shift + 5, hash, key);
+        else
+            return ValPtr();
+    }
+
+private:
+    NodePtr const* progeny_;
+    size_t const size_;
 };
 
 }

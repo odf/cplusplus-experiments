@@ -9,11 +9,11 @@ using namespace odf::hash_trie;
 
 int main()
 {
-    assert(mask(0x12345678,  0) == 0x18);
-    assert(mask(0x12345678,  5) == 0x13);
-    assert(mask(0x12345678, 10) == 0x15);
-    assert(mask(0x12345678, 15) == 0x08);
-    assert(mask(0x12345678, 20) == 0x03);
+    assert(masked(0x12345678,  0) == 0x18);
+    assert(masked(0x12345678,  5) == 0x13);
+    assert(masked(0x12345678, 10) == 0x15);
+    assert(masked(0x12345678, 15) == 0x08);
+    assert(masked(0x12345678, 20) == 0x03);
 
     assert(bitCount(0x12345678) == 13);
     assert(bitCount(0xffffffff) == 32);
