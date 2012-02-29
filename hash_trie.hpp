@@ -123,7 +123,7 @@ template<typename Key, typename Val> class BitmappedNode;
 // ----------------------------------------------------------------------------
 
 template<typename Key, typename Val>
-class Node
+struct Node
 {
     typename std::tr1::shared_ptr<Val>             typedef ValPtr;
     typename std::tr1::shared_ptr<Node<Val, Key> > typedef NodePtr;
@@ -151,11 +151,53 @@ class Node
 };
 
 // ----------------------------------------------------------------------------
+// We use an empty node to avoid checking for null pointers
+// ----------------------------------------------------------------------------
+
+template<typename Key, typename Val>
+struct EmptyNode : public Node<Key, Val>
+{
+    typename Node<Key, Val>::ValPtr  typedef ValPtr;
+    typename Node<Key, Val>::NodePtr typedef NodePtr;
+    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
+
+    EmptyNode() {}
+
+    size_t size() const { return 0; }
+
+    bool isLeaf() const { return true; }
+
+    ValPtr get(indexType const shift,
+               hashType  const hash,
+               Key       const key) const
+    {
+        return ValPtr();
+    }
+
+    NodePtr insert(NodePtr   const self,
+                   indexType const shift,
+                   hashType  const hash,
+                   LeafPtr   const leaf) const
+    {
+        return leaf;
+    }
+
+    NodePtr erase(NodePtr   const self,
+                  indexType const shift,
+                  hashType  const hash,
+                  Key       const key) const
+    {
+        return self;
+    }
+};
+
+    
+// ----------------------------------------------------------------------------
 // A leaf node holds a single key,value pair
 // ----------------------------------------------------------------------------
 
 template<typename Key, typename Val>
-class Leaf : public Node<Key, Val>
+struct Leaf : public Node<Key, Val>
 {
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
@@ -206,7 +248,7 @@ class Leaf : public Node<Key, Val>
                   hashType  const hash,
                   Key       const key) const
     {
-        return NodePtr();
+        return EmptyNode<Key, Val>();
     }
 
     Key key() const { return key_; }
@@ -222,7 +264,7 @@ private:
 // ----------------------------------------------------------------------------
 
 template<typename Key, typename Val>
-class CollisionNode : public Node<Key, Val>
+struct CollisionNode : public Node<Key, Val>
 {
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
@@ -280,7 +322,7 @@ class CollisionNode : public Node<Key, Val>
     {
         if (bucket_.size() < 2)
         {
-            return NodePtr();
+            return EmptyNode<Key, Val>();
         }
         else if (bucket_.size() == 2)
         {
@@ -318,7 +360,7 @@ private:
 // ----------------------------------------------------------------------------
 
 template<typename Key, typename Val>
-class ArrayNode : public Node<Key, Val>
+struct ArrayNode : public Node<Key, Val>
 {
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
@@ -377,7 +419,7 @@ class ArrayNode : public Node<Key, Val>
     {
         indexType i = masked(hash, shift);
         NodePtr node = progeny_[i]->erase(progeny_[i], shift+5, hash, key);
-        if (node.get() != 0)
+        if (node->size() > 0)
         {
             return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, node),
                                          size() - 1));
@@ -410,7 +452,7 @@ class ArrayNode : public Node<Key, Val>
             else
             {
                 return NodePtr(new ArrayNode(arrayWith(progeny_, 32,
-                                                       i, NodePtr()),
+                                                       i, EmptyNode<Key, Val>()),
                                              size() - 1));
             }
         }
@@ -426,7 +468,7 @@ private:
 // ----------------------------------------------------------------------------
 
 template<typename Key, typename Val>
-class BitmappedNode : public Node<Key, Val>
+struct BitmappedNode : public Node<Key, Val>
 {
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
@@ -530,7 +572,7 @@ class BitmappedNode : public Node<Key, Val>
         indexType newSize;
         NodePtr*  newArray;
 
-        if (node.get() != 0)
+        if (node->size() > 0)
         {
             newBitmap = bitmap_;
             newSize   = size() + node->size() - v.size();
@@ -546,7 +588,7 @@ class BitmappedNode : public Node<Key, Val>
         indexType nrBits = bitCount(newBitmap);
         if (nrBits == 0)
         {
-            return NodePtr();
+            return EmptyNode<Key, Val>();
         }
         else if (nrBits == 1 and newArray[0]->isLeaf())
         {
@@ -562,6 +604,54 @@ private:
     NodePtr const* progeny_;
     hashType const bitmap_;
     size_t const size_;
+};
+
+// ----------------------------------------------------------------------------
+// The driver class
+// ----------------------------------------------------------------------------
+
+template<typename Key, typename Val, typename hashFunc>
+class PersistentMap
+{
+public:
+    typename Node<Key, Val>::ValPtr  typedef ValPtr;
+    typename Node<Key, Val>::NodePtr typedef NodePtr;
+    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
+
+    PersistentMap()
+        : root_(EmptyNode<Key, Val>())
+    {
+    }
+
+    size_t size() const
+    {
+        return root_->size();
+    }
+
+    ValPtr get(Key const key)
+    {
+        return root_->get(0, hashFunc(key), key);
+    }
+
+    PersistentMap insert(Key const key, Val const val)
+    {
+        hashType hash = hashFunc(key);
+        LeafPtr leaf(new Leaf<Key, Val>(hash, key, ValPtr(new Val(val))));
+        return PersistentMap(root_->insert(root_, 0, hash, leaf));
+    }
+
+    PersistentMap erase(Key const key)
+    {
+        return PersistentMap(root_->erase(root_, 0, hashFunc(key), key));
+    }
+
+private:
+    PersistentMap(NodePtr const root)
+        : root_(root)
+    {
+    }
+
+    NodePtr const root_;
 };
 
 }
