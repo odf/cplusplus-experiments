@@ -355,9 +355,20 @@ struct CollisionNode : public Node<Key, Val>
 
     std::string asString() const
     {
-        return "CollisionNode";
+        std::stringstream ss;
+        ss << "CollisionNode(";
+        for (typename Bucket::const_iterator iter = bucket_.begin();
+             iter != bucket_.end();
+             ++iter)
+        {
+            if (iter != bucket_.begin())
+                ss << ", ";
+            ss << (*iter)->asString();
+        }
+        ss << ")";
+        return ss.str();
     }
-
+        
 private:
     hashType const hash_;
     Bucket const bucket_;
@@ -486,7 +497,21 @@ struct ArrayNode : public Node<Key, Val>
 
     std::string asString() const
     {
-        return "ArrayNode";
+        std::stringstream ss;
+        ss << "ArrayNode(";
+        int j = 0;
+        for (int i = 0; i < 32; ++i)
+        {
+            if (progeny_[i].get() != 0)
+            {
+                if (j > 0)
+                    ss << ", ";
+                ss << i << " -> " << progeny_[i]->asString();
+                ++j;
+            }
+        }
+        ss << ")";
+        return ss.str();
     }
         
 private:
@@ -647,6 +672,7 @@ struct BitmappedNode : public Node<Key, Val>
                 ss << i << " -> " << progeny_[j]->asString();
             }
         }
+        ss << ")";
         return ss.str();
     }
         
