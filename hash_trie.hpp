@@ -77,7 +77,7 @@ hashType maskBit(hashType const n, indexType const shift)
 
 template<typename T>
 inline
-T const* arrayWith(T const* const source, int const len,
+T const* const arrayWith(T const* const source, int const len,
                          int const pos, T const val)
 {
     T* copy = new T[len];
@@ -88,7 +88,7 @@ T const* arrayWith(T const* const source, int const len,
 
 template<typename T>
 inline
-T const* arrayWithInsertion(T const* const source, int const len,
+T const* const arrayWithInsertion(T const* const source, int const len,
                                   int const pos, T const val)
 {
     T* copy = new T[len + 1];
@@ -100,7 +100,7 @@ T const* arrayWithInsertion(T const* const source, int const len,
 
 template<typename T>
 inline
-T const* arrayWithout(T const* const source, int const len,
+T const* const arrayWithout(T const* const source, int const len,
                             int const pos)
 {
     T* copy = new T[len - 1];
@@ -146,7 +146,7 @@ struct Node
                           hashType  const hash,
                           Key       const key) const = 0;
 
-    virtual Key key() const {};
+    virtual Key const& key() const {};
 };
 
 // ----------------------------------------------------------------------------
@@ -248,7 +248,7 @@ struct Leaf : public Node<Key, Val>
         return NodePtr(new EmptyNode<Key, Val>());
     }
 
-    Key key() const { return key_; }
+    Key const& key() const { return key_; }
 
 private:
     hashType const hash_;
