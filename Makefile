@@ -9,7 +9,8 @@ graph_test:		graph_test.o
 	$(CXX) $(CXXFLAGS) graph_test.o -o graph_test -lboost_serialization-mt
 
 hash_trie_test:		hash_trie_test.o
-	$(CXX) $(CXXFLAGS) hash_trie_test.o -o hash_trie_test
+	$(CXX) $(CXXFLAGS) hash_trie_test.o -o hash_trie_test \
+	    -lboost_unit_test_framework-mt
 
 boost_mpi_test.o: 	boost_mpi_test.cpp
 	mpic++ $(CXXFLAGS) -c boost_mpi_test.cpp -o boost_mpi_test.o
