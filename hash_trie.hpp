@@ -13,6 +13,7 @@
 #include <cstring>
 #include <stdint.h>
 #include <vector>
+#include <sstream>
 
 #include <boost/config.hpp>
 
@@ -77,35 +78,39 @@ hashType maskBit(hashType const n, indexType const shift)
 
 template<typename T>
 inline
-T const* const arrayWith(T const* const source, int const len,
-                         int const pos, T const val)
+T const* arrayWith(T const* source, int const len,
+                   int const pos, T const val)
 {
     T* copy = new T[len];
-    memcpy(copy, source, len * sizeof(T));
-    copy[pos] = val;
+    for (int i = 0; i < len; ++i)
+        copy[i] = (i == pos) ? val : source[i];
     return copy;
 }
 
 template<typename T>
 inline
-T const* const arrayWithInsertion(T const* const source, int const len,
-                                  int const pos, T const val)
+T const* arrayWithInsertion(T const* source, int const len,
+                            int const pos, T const val)
 {
     T* copy = new T[len + 1];
-    memcpy(copy, source, pos * sizeof(T));
+    for (int i = 0; i < pos; ++i)
+        copy[i] = source[i];
     copy[pos] = val;
-    memcpy(&copy[pos + 1], &source[pos], (len - pos) * sizeof(T));
+    for (int i = pos; i < len; ++i)
+        copy[i+1] = source[i];
     return copy;
 }
 
 template<typename T>
 inline
-T const* const arrayWithout(T const* const source, int const len,
-                            int const pos)
+T const* arrayWithout(T const* source, int const len,
+                      int const pos)
 {
     T* copy = new T[len - 1];
-    memcpy(copy, source, pos * sizeof(T));
-    memcpy(&copy[pos], &source[pos + 1], (len - pos - 1) * sizeof(T));
+    for (int i = 0; i < pos; ++i)
+        copy[i] = source[i];
+    for (int i = pos+1; i < len; ++i)
+        copy[i-1] = source[i];
     return copy;
 }
 
@@ -147,6 +152,8 @@ struct Node
                           Key       const key) const = 0;
 
     virtual Key const& key() const {};
+
+    virtual std::string asString() const = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -187,9 +194,14 @@ struct EmptyNode : public Node<Key, Val>
     {
         return self;
     }
+
+    std::string asString() const
+    {
+        return "EmptyNode";
+    }
 };
 
-    
+
 // ----------------------------------------------------------------------------
 // A leaf node holds a single key,value pair
 // ----------------------------------------------------------------------------
@@ -249,6 +261,14 @@ struct Leaf : public Node<Key, Val>
     }
 
     Key const& key() const { return key_; }
+
+
+    std::string asString() const
+    {
+        std::stringstream ss;
+        ss << "Leaf(" << key_ << " -> " << *value_.get() << ")";
+        return ss.str();
+    }
 
 private:
     hashType const hash_;
@@ -331,6 +351,11 @@ struct CollisionNode : public Node<Key, Val>
         {
             return NodePtr(new CollisionNode(hash, bucketWithout(key)));
         }
+    }
+
+    std::string asString() const
+    {
+        return "CollisionNode";
     }
 
 private:
@@ -457,6 +482,11 @@ struct ArrayNode : public Node<Key, Val>
                                    size() - 1));
             }
         }
+    }
+
+    std::string asString() const
+    {
+        return "ArrayNode";
     }
         
 private:
@@ -602,6 +632,24 @@ struct BitmappedNode : public Node<Key, Val>
         }
     }
 
+    std::string asString() const
+    {
+        std::stringstream ss;
+        ss << "BitmappedNode(";
+        for (int i = 0; i < 32; ++i)
+        {
+            hashType bit = 1 << i;
+            if (bitmap_ & bit)
+            {
+                indexType j = indexForBit(bitmap_, bit);
+                if (j > 0)
+                    ss << ", ";
+                ss << i << " -> " << progeny_[j]->asString();
+            }
+        }
+        return ss.str();
+    }
+        
 private:
     NodePtr const* progeny_;
     hashType const bitmap_;
@@ -646,6 +694,13 @@ public:
         return PersistentMap(root_->erase(root_, 0, hashFunc(key), key));
     }
 
+    std::string asString() const
+    {
+        std::stringstream ss;
+        ss << "PersistentMap(" << root_->asString() << ")";
+        return ss.str();
+    }
+
 private:
     PersistentMap(NodePtr const root)
         : root_(root)
@@ -655,6 +710,14 @@ private:
     NodePtr const root_;
 };
 
+
+template<typename Key, typename Val, hashType (*hashFunc)(Key const)>
+std::ostream& operator<<(std::ostream& out,
+                         PersistentMap<Key, Val, hashFunc> const& map)
+{
+    out << map.asString();
+    return out;
+}
 }
 }
 

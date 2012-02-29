@@ -56,12 +56,20 @@ int main()
         }
     }
 
+    const int* x = arrayWithInsertion((int *) 0, 0, 0, 1);
+    assert(x[0] == 1);
+
     typedef PersistentMap<int, int, id> Map;
 
-    Map map = Map().insert(1, 2).insert(3, 4);
-    map.get(1);
-    //assert(*map.get(1) == 2);
-    //assert(*map.get(3) == 4);
+    std::cout << "Empty map: " << std::endl << "  " << Map() << std::endl;
+
+    Map map = Map().insert(1, 2).insert(3, 4).insert(259, 5);
+    std::cout << "More interesting one: " << std::endl
+              << "  " << map << std::endl;
+
+    assert(*map.get(1) == 2);
+    assert(*map.get(3) == 4);
+    assert(*map.get(259) == 5);
 
     std::cout << "Everything seems okay." << std::endl;
 }
