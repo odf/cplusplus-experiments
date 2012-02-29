@@ -2,21 +2,14 @@ CXXWARNS = -Wall -Wextra -pedantic
 CXXFLAGS = $(CXXWARNS) -g -O3
 PROGRAMS = list_test hash_trie_test graph_test boost_mpi_test distributed_graph
 
-UNITTEST = ../unittest-cpp/UnitTest++
-
 list_test:		list_test.o
 	$(CXX) $(CXXFLAGS) list_test.o -o list_test -lgmp -lm
 
 graph_test:		graph_test.o
 	$(CXX) $(CXXFLAGS) graph_test.o -o graph_test -lboost_serialization-mt
 
-hash_trie_test.o:	hash_trie_test.cpp
-	$(CXX) $(CXXFLAGS) -I$(UNITTEST)/src -c \
-	     hash_trie_test.cpp -o hash_trie_test.o
-
 hash_trie_test:		hash_trie_test.o
-	$(CXX) $(CXXFLAGS) hash_trie_test.o -o hash_trie_test \
-	    -L$(UNITTEST) -lUnitTest++
+	$(CXX) $(CXXFLAGS) hash_trie_test.o -o hash_trie_test -lUnitTest++
 
 boost_mpi_test.o: 	boost_mpi_test.cpp
 	mpic++ $(CXXFLAGS) -c boost_mpi_test.cpp -o boost_mpi_test.o

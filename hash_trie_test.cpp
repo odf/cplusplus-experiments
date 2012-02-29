@@ -1,6 +1,6 @@
 /* -*-c++-*- */
 
-#include <UnitTest++.h>
+#include <unittest++/UnitTest++.h>
 
 #include <cassert>
 
