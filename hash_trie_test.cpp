@@ -24,6 +24,7 @@ int main()
     assert(indexForBit(0x01010101, 0x01000000) == 3);
     assert(indexForBit(0x01010101, 0x00010000) == 2);
     assert(indexForBit(0xffffffff, 0x00040000) == 18);
+    assert(indexForBit(0xfffbffff, 0x00040000) == 18);
 
     int a[] = { 0, 1, 2, 3 };
     for (int k = 0; k < 4; ++k)

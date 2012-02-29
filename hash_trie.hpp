@@ -77,7 +77,7 @@ hashType maskBit(hashType const n, indexType const shift)
 
 template<typename T>
 inline
-T const* const arrayWith(T const* const source, int const len,
+T const* arrayWith(T const* const source, int const len,
                          int const pos, T const val)
 {
     T* copy = new T[len];
@@ -88,7 +88,7 @@ T const* const arrayWith(T const* const source, int const len,
 
 template<typename T>
 inline
-T const* const arrayWithInsertion(T const* const source, int const len,
+T const* arrayWithInsertion(T const* const source, int const len,
                                   int const pos, T const val)
 {
     T* copy = new T[len + 1];
@@ -100,7 +100,7 @@ T const* const arrayWithInsertion(T const* const source, int const len,
 
 template<typename T>
 inline
-T const* const arrayWithout(T const* const source, int const len,
+T const* arrayWithout(T const* const source, int const len,
                             int const pos)
 {
     T* copy = new T[len - 1];
@@ -352,12 +352,12 @@ class ArrayNode : public Node<Key, Val>
         {
             NodePtr node = progeny_[i]->insert(progeny_[i], shift+5, hash, leaf);
             size_t newSize = size() + node->size() - progeny_[i]->size();
-            return NodePtr(new ArrayNode(arrayWith(progeny_, i, node),
+            return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, node),
                                          newSize));
         }
         else
         {
-            return NodePtr(new ArrayNode(arrayWith(progeny_, i, leaf),
+            return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, leaf),
                                          size() + 1));
         }
     }
@@ -371,7 +371,7 @@ class ArrayNode : public Node<Key, Val>
         NodePtr node = progeny_[i]->erase(progeny_[i], shift+5, hash, key);
         if (node.get() != 0)
         {
-            return NodePtr(new ArrayNode(arrayWith(progeny_, i, node),
+            return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, node),
                                          size() - 1));
         }
         else
@@ -382,7 +382,7 @@ class ArrayNode : public Node<Key, Val>
                 if (j != i and progeny_[j].get() != 0)
                     ++count;
             }
-            if (count <= 4)
+            if (count <= 8)
             {
                 NodePtr* remaining = new NodePtr[count];
                 hashType bitmap = 0;
@@ -401,7 +401,8 @@ class ArrayNode : public Node<Key, Val>
             }
             else
             {
-                return NodePtr(new ArrayNode(arrayWith(progeny_, i, NodePtr()),
+                return NodePtr(new ArrayNode(arrayWith(progeny_, 32,
+                                                       i, NodePtr()),
                                              size() - 1));
             }
         }
@@ -409,6 +410,105 @@ class ArrayNode : public Node<Key, Val>
         
 private:
     NodePtr const* progeny_;
+    size_t const size_;
+};
+
+// ----------------------------------------------------------------------------
+// An bitmapped node contains a sparse array of child nodes
+// ----------------------------------------------------------------------------
+
+template<typename Key, typename Val>
+class BitmappedNode : public Node<Key, Val>
+{
+    typename Node<Key, Val>::ValPtr  typedef ValPtr;
+    typename Node<Key, Val>::NodePtr typedef NodePtr;
+    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
+
+    BitmappedNode()
+        : progeny_(0),
+          bitmap_(0),
+          size_(0)
+    {
+    }
+
+    BitmappedNode(hashType const bitmap,
+                  NodePtr const* progeny,
+                  size_t const size)
+        : bitmap_(bitmap),
+          progeny_(progeny),
+          size_(size)
+    {
+    }
+
+    ~BitmappedNode()
+    {
+        delete[] progeny_;
+    }
+
+    size_t size() const { return size_; }
+
+    ValPtr get(indexType const shift,
+               hashType  const hash,
+               Key       const key) const
+    {
+        hashType bit = maskBit(hash, shift);
+        if ((bitmap_ & bit) != 0)
+        {
+            indexType i = indexForBit(bitmap_, bit);
+            return progeny_[i]->get(shift + 5, hash, key);
+        }
+        else
+        {
+            return ValPtr();
+        }
+    }
+
+    NodePtr insert(NodePtr   const self,
+                   indexType const shift,
+                   hashType  const hash,
+                   LeafPtr   const leaf) const
+    {
+        hashType bit = maskBit(hash, shift);
+        indexType i = indexForBit(bitmap_, bit);
+        
+        if ((bitmap_ & bit) == 0)
+        {
+            indexType n = bitCount(bitmap_);
+            if (n < 16)
+            {
+                NodePtr* newArray = arrayWithInsertion(progeny_, n, i, leaf);
+                return NodePtr(new BitmappedNode(
+                                   bitmap_ | bit, newArray, size() + 1));
+            }
+            else
+            {
+                NodePtr* newArray = new NodePtr[32];
+                for (int j = 0; j < 32; ++j)
+                {
+                    hashType b = 1 << j;
+                    if ((bitmap_ & b) != 0)
+                    {
+                        newArray[j] = progeny_[indexForBit(bitmap_, b)];
+                    }
+                    newArray[masked(hash, shift)] = leaf;
+                    return NodePtr(new ArrayNode<Key, Val>(
+                                       newArray, size() + 1));
+                }
+            }
+        }
+        else
+        {
+            NodePtr v = progeny_[i];
+            NodePtr node = v->insert(v, shift + 5, hash, leaf);
+            NodePtr* newArray = arrayWith(progeny_, bitCount(bitmap_), i, node);
+            indexType newSize = size() + node->size() - v->size();
+            return NodePtr(new BitmappedNode(bitmap_, newArray, newSize));
+        }
+    }
+
+private:
+    NodePtr const* progeny_;
+    hashType const bitmap_;
     size_t const size_;
 };
 

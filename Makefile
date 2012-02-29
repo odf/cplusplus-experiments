@@ -1,4 +1,4 @@
-CXXFLAGS = -g -O3 -I$(HOME)/include
+CXXFLAGS = -Wall -Wextra -pedantic -g -O3 -I$(HOME)/include
 PROGRAMS = list_test hash_trie_test graph_test boost_mpi_test distributed_graph
 
 list_test:		list_test.o
