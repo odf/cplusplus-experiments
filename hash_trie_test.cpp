@@ -7,6 +7,12 @@
 
 using namespace odf::hash_trie;
 
+hashType id(int const val)
+{
+    return val;
+}
+
+
 int main()
 {
     assert(masked(0x12345678,  0) == 0x18);
@@ -49,6 +55,13 @@ int main()
             assert(d[i] == ((i < k) ? i : i + 1));
         }
     }
+
+    typedef PersistentMap<int, int, id> Map;
+
+    Map map = Map().insert(1, 2).insert(3, 4);
+    map.get(1);
+    //assert(*map.get(1) == 2);
+    //assert(*map.get(3) == 4);
 
     std::cout << "Everything seems okay." << std::endl;
 }

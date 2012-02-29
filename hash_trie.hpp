@@ -127,27 +127,26 @@ struct Node
 {
     typename std::tr1::shared_ptr<Val>             typedef ValPtr;
     typename std::tr1::shared_ptr<Node<Val, Key> > typedef NodePtr;
-    typename std::tr1::shared_ptr<Leaf<Val, Key> > typedef LeafPtr;
 
-    virtual ~Node() = 0;
+    virtual size_t size() const = 0;
 
-    virtual size_t size() const;
-
-    virtual bool isLeaf() const;
+    virtual bool isLeaf() const = 0;
 
     virtual ValPtr get(indexType const shift,
                        hashType  const hash,
-                       Key       const key) const;
+                       Key       const key) const = 0;
 
     virtual NodePtr insert(NodePtr   const self,
                            indexType const shift,
                            hashType  const hash,
-                           LeafPtr   const leaf) const;
+                           NodePtr   const leaf) const = 0;
 
     virtual NodePtr erase(NodePtr   const self,
                           indexType const shift,
                           hashType  const hash,
-                          Key       const key) const;
+                          Key       const key) const = 0;
+
+    virtual Key key() const {};
 };
 
 // ----------------------------------------------------------------------------
@@ -159,7 +158,6 @@ struct EmptyNode : public Node<Key, Val>
 {
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
-    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
 
     EmptyNode() {}
 
@@ -177,7 +175,7 @@ struct EmptyNode : public Node<Key, Val>
     NodePtr insert(NodePtr   const self,
                    indexType const shift,
                    hashType  const hash,
-                   LeafPtr   const leaf) const
+                   NodePtr   const leaf) const
     {
         return leaf;
     }
@@ -201,7 +199,6 @@ struct Leaf : public Node<Key, Val>
 {
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
-    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
 
     Leaf(hashType const hash, Key const key, ValPtr const value)
         : hash_(hash),
@@ -224,9 +221,9 @@ struct Leaf : public Node<Key, Val>
     NodePtr insert(NodePtr   const self,
                    indexType const shift,
                    hashType  const hash,
-                   LeafPtr   const leaf) const
+                   NodePtr   const leaf) const
     {
-        if (key_ == leaf.key_)
+        if (key_ == leaf->key())
         {
             return leaf;
         }
@@ -248,7 +245,7 @@ struct Leaf : public Node<Key, Val>
                   hashType  const hash,
                   Key       const key) const
     {
-        return EmptyNode<Key, Val>();
+        return NodePtr(new EmptyNode<Key, Val>());
     }
 
     Key key() const { return key_; }
@@ -268,13 +265,12 @@ struct CollisionNode : public Node<Key, Val>
 {
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
-    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
 
-    typedef std::vector<LeafPtr> Bucket;
+    typedef std::vector<NodePtr> Bucket;
 
-    CollisionNode(hashType const hash, Bucket const bucket)
+    CollisionNode(hashType const hash)
         : hash_(hash),
-          bucket_(bucket)
+          bucket_()
     {
     }
 
@@ -290,8 +286,8 @@ struct CollisionNode : public Node<Key, Val>
              iter != bucket_.end();
              ++iter)
         {
-            if (iter->key_ == key)
-                return iter->get(shift, hash, key);
+            if ((*iter)->key() == key)
+                return (*iter)->get(shift, hash, key);
         }
         return ValPtr();
     }
@@ -299,7 +295,7 @@ struct CollisionNode : public Node<Key, Val>
     NodePtr insert(NodePtr   const self,
                    indexType const shift,
                    hashType  const hash,
-                   LeafPtr   const leaf) const
+                   NodePtr   const leaf) const
     {
         if (hash != hash_)
         {
@@ -309,7 +305,7 @@ struct CollisionNode : public Node<Key, Val>
         }
         else
         {
-            Bucket newBucket = bucketWithout(leaf.key());
+            Bucket newBucket = bucketWithout(leaf->key());
             newBucket.push_back(leaf);
             return NodePtr(new CollisionNode(hash, newBucket));
         }
@@ -322,7 +318,7 @@ struct CollisionNode : public Node<Key, Val>
     {
         if (bucket_.size() < 2)
         {
-            return EmptyNode<Key, Val>();
+            return NodePtr(new EmptyNode<Key, Val>());
         }
         else if (bucket_.size() == 2)
         {
@@ -341,6 +337,12 @@ private:
     hashType const hash_;
     Bucket const bucket_;
 
+    CollisionNode(hashType const hash, Bucket const bucket)
+        : hash_(hash),
+          bucket_(bucket)
+    {
+    }
+
     Bucket bucketWithout(Key const key) const
     {
         Bucket result;
@@ -348,7 +350,7 @@ private:
              iter != bucket_.end();
              ++iter)
         {
-            if (iter->key_ != key)
+            if ((*iter)->key() != key)
                 result.push_back(*iter);
         }
         return result;
@@ -364,7 +366,6 @@ struct ArrayNode : public Node<Key, Val>
 {
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
-    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
 
     ArrayNode(NodePtr const* progeny, size_t const size)
         : progeny_(progeny),
@@ -395,7 +396,7 @@ struct ArrayNode : public Node<Key, Val>
     NodePtr insert(NodePtr   const self,
                    indexType const shift,
                    hashType  const hash,
-                   LeafPtr   const leaf) const
+                   NodePtr   const leaf) const
     {
         indexType i = masked(hash, shift);
         if (progeny_[i].get() != 0)
@@ -451,9 +452,9 @@ struct ArrayNode : public Node<Key, Val>
             }
             else
             {
-                return NodePtr(new ArrayNode(arrayWith(progeny_, 32,
-                                                       i, EmptyNode<Key, Val>()),
-                                             size() - 1));
+                return NodePtr(new ArrayNode(
+                                   arrayWith(progeny_, 32, i, NodePtr()),
+                                   size() - 1));
             }
         }
     }
@@ -472,7 +473,6 @@ struct BitmappedNode : public Node<Key, Val>
 {
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
-    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
 
     BitmappedNode()
         : progeny_(0),
@@ -518,7 +518,7 @@ struct BitmappedNode : public Node<Key, Val>
     NodePtr insert(NodePtr   const self,
                    indexType const shift,
                    hashType  const hash,
-                   LeafPtr   const leaf) const
+                   NodePtr   const leaf) const
     {
         hashType bit = maskBit(hash, shift);
         indexType i = indexForBit(bitmap_, bit);
@@ -528,7 +528,8 @@ struct BitmappedNode : public Node<Key, Val>
             indexType n = bitCount(bitmap_);
             if (n < 16)
             {
-                NodePtr* newArray = arrayWithInsertion(progeny_, n, i, leaf);
+                NodePtr const* newArray =
+                    arrayWithInsertion(progeny_, n, i, leaf);
                 return NodePtr(new BitmappedNode(
                                    bitmap_ | bit, newArray, size() + 1));
             }
@@ -552,7 +553,8 @@ struct BitmappedNode : public Node<Key, Val>
         {
             NodePtr v = progeny_[i];
             NodePtr node = v->insert(v, shift + 5, hash, leaf);
-            NodePtr* newArray = arrayWith(progeny_, bitCount(bitmap_), i, node);
+            NodePtr const* newArray = 
+                arrayWith(progeny_, bitCount(bitmap_), i, node);
             indexType newSize = size() + node->size() - v->size();
             return NodePtr(new BitmappedNode(bitmap_, newArray, newSize));
         }
@@ -570,12 +572,12 @@ struct BitmappedNode : public Node<Key, Val>
 
         hashType  newBitmap;
         indexType newSize;
-        NodePtr*  newArray;
+        NodePtr const*  newArray;
 
         if (node->size() > 0)
         {
             newBitmap = bitmap_;
-            newSize   = size() + node->size() - v.size();
+            newSize   = size() + node->size() - v->size();
             newArray  = arrayWith(progeny_, bitCount(bitmap_), i, node);
         }
         else
@@ -588,7 +590,7 @@ struct BitmappedNode : public Node<Key, Val>
         indexType nrBits = bitCount(newBitmap);
         if (nrBits == 0)
         {
-            return EmptyNode<Key, Val>();
+            return NodePtr(new EmptyNode<Key, Val>());
         }
         else if (nrBits == 1 and newArray[0]->isLeaf())
         {
@@ -610,16 +612,15 @@ private:
 // The driver class
 // ----------------------------------------------------------------------------
 
-template<typename Key, typename Val, typename hashFunc>
+template<typename Key, typename Val, hashType (*hashFunc)(Key const)>
 class PersistentMap
 {
 public:
     typename Node<Key, Val>::ValPtr  typedef ValPtr;
     typename Node<Key, Val>::NodePtr typedef NodePtr;
-    typename Node<Key, Val>::LeafPtr typedef LeafPtr;
 
     PersistentMap()
-        : root_(EmptyNode<Key, Val>())
+        : root_(new EmptyNode<Key, Val>())
     {
     }
 
@@ -636,7 +637,7 @@ public:
     PersistentMap insert(Key const key, Val const val)
     {
         hashType hash = hashFunc(key);
-        LeafPtr leaf(new Leaf<Key, Val>(hash, key, ValPtr(new Val(val))));
+        NodePtr leaf(new Leaf<Key, Val>(hash, key, ValPtr(new Val(val))));
         return PersistentMap(root_->insert(root_, 0, hash, leaf));
     }
 
