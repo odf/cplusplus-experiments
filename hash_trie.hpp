@@ -133,6 +133,8 @@ class Node
 
     virtual size_t size() const;
 
+    virtual bool isLeaf() const;
+
     virtual ValPtr get(indexType const shift,
                        hashType  const hash,
                        Key       const key) const;
@@ -167,6 +169,8 @@ class Leaf : public Node<Key, Val>
     }
 
     size_t size() const { return 1; }
+
+    bool isLeaf() const { return true; }
 
     ValPtr get(indexType const shift,
                hashType  const hash,
@@ -233,6 +237,8 @@ class CollisionNode : public Node<Key, Val>
     }
 
     size_t size() const { return bucket_.size(); }
+
+    bool isLeaf() const { return true; }
 
     ValPtr get(indexType const shift,
                hashType  const hash,
@@ -330,6 +336,8 @@ class ArrayNode : public Node<Key, Val>
     }
 
     size_t size() const { return size_; }
+
+    bool isLeaf() const { return false; }
 
     ValPtr get(indexType const shift,
                hashType  const hash,
@@ -447,6 +455,8 @@ class BitmappedNode : public Node<Key, Val>
 
     size_t size() const { return size_; }
 
+    bool isLeaf() const { return false; }
+
     ValPtr get(indexType const shift,
                hashType  const hash,
                Key       const key) const
@@ -503,6 +513,48 @@ class BitmappedNode : public Node<Key, Val>
             NodePtr* newArray = arrayWith(progeny_, bitCount(bitmap_), i, node);
             indexType newSize = size() + node->size() - v->size();
             return NodePtr(new BitmappedNode(bitmap_, newArray, newSize));
+        }
+    }
+
+    NodePtr erase(NodePtr   const self,
+                  indexType const shift,
+                  hashType  const hash,
+                  Key       const key) const
+    {
+        hashType bit = maskBit(hash, shift);
+        indexType i = indexForBit(bitmap_, bit);
+        NodePtr v = progeny_[i];
+        NodePtr node = v->erase(v, shift + 5, hash, key);
+
+        hashType  newBitmap;
+        indexType newSize;
+        NodePtr*  newArray;
+
+        if (node.get() != 0)
+        {
+            newBitmap = bitmap_;
+            newSize   = size() + node->size() - v.size();
+            newArray  = arrayWith(progeny_, bitCount(bitmap_), i, node);
+        }
+        else
+        {
+            newBitmap = bitmap_ ^ bit;
+            newSize   = size() - 1;
+            newArray  = arrayWithout(progeny_, bitCount(bitmap_), i);
+        }
+
+        indexType nrBits = bitCount(newBitmap);
+        if (nrBits == 0)
+        {
+            return NodePtr();
+        }
+        else if (nrBits == 1 and newArray[0]->isLeaf())
+        {
+            return newArray[0];
+        }
+        else
+        {
+            return NodePtr(new BitmappedNode(newBitmap, newArray, newSize));
         }
     }
 
