@@ -49,11 +49,11 @@ SUITE(ArrayCopyOnWrite)
 {
     int in[] = { 0, 1, 2, 3 };
 
-    TEST(ArrayWithFunction)
+    TEST(ArrayUpdateFunction)
     {
         for (int k = 0; k < 4; ++k)
         {
-            const int* out = arrayWith(in, 4, k, 5);
+            const int* out = arrayUpdate(in, 4, k, 5);
             
             for (int i = 0; i < 4; ++i)
                 CHECK_EQUAL(i, in[i]);
@@ -65,11 +65,11 @@ SUITE(ArrayCopyOnWrite)
         }
     }
 
-    TEST(ArrayWithInsertionFunction)
+    TEST(ArrayInsertFunction)
     {
         for (int k = 0; k < 4; ++k)
         {
-            const int* out = arrayWithInsertion(in, 4, k, 5);
+            const int* out = arrayInsert(in, 4, k, 5);
             
             for (int i = 0; i < 4; ++i)
                 CHECK_EQUAL(i, in[i]);
@@ -81,11 +81,11 @@ SUITE(ArrayCopyOnWrite)
         }
     }
 
-    TEST(ArrayWithoutFunction)
+    TEST(ArrayRemoveFunction)
     {
         for (int k = 0; k < 4; ++k)
         {
-            const int* out = arrayWithout(in, 4, k);
+            const int* out = arrayRemove(in, 4, k);
             
             for (int i = 0; i < 4; ++i)
                 CHECK_EQUAL(i, in[i]);
@@ -99,7 +99,7 @@ SUITE(ArrayCopyOnWrite)
 
     TEST(EmptyArray)
     {
-        const int* x = arrayWithInsertion((int *) 0, 0, 0, 1);
+        const int* x = arrayInsert((int *) 0, 0, 0, 1);
         CHECK_EQUAL(1, x[0]);
 
         delete[] x;

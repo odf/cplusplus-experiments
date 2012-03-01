@@ -78,8 +78,7 @@ hashType maskBit(hashType const n, indexType const shift)
 
 template<typename T>
 inline
-T const* arrayWith(T const* source, int const len,
-                   int const pos, T const val)
+T const* arrayUpdate(T const* source, int const len, int const pos, T const val)
 {
     T* copy = new T[len];
     for (int i = 0; i < len; ++i)
@@ -89,8 +88,7 @@ T const* arrayWith(T const* source, int const len,
 
 template<typename T>
 inline
-T const* arrayWithInsertion(T const* source, int const len,
-                            int const pos, T const val)
+T const* arrayInsert(T const* source, int const len, int const pos, T const val)
 {
     T* copy = new T[len + 1];
     for (int i = 0; i < pos; ++i)
@@ -103,8 +101,7 @@ T const* arrayWithInsertion(T const* source, int const len,
 
 template<typename T>
 inline
-T const* arrayWithout(T const* source, int const len,
-                      int const pos)
+T const* arrayRemove(T const* source, int const len, int const pos)
 {
     T* copy = new T[len - 1];
     for (int i = 0; i < pos; ++i)
@@ -441,12 +438,12 @@ struct ArrayNode : public Node<Key, Val>
         {
             NodePtr node = progeny_[i]->insert(shift+5, hash, leaf);
             size_t newSize = size() + node->size() - progeny_[i]->size();
-            return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, node),
+            return NodePtr(new ArrayNode(arrayUpdate(progeny_, 32, i, node),
                                          newSize));
         }
         else
         {
-            return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, leaf),
+            return NodePtr(new ArrayNode(arrayUpdate(progeny_, 32, i, leaf),
                                          size() + 1));
         }
     }
@@ -459,7 +456,7 @@ struct ArrayNode : public Node<Key, Val>
         NodePtr node = progeny_[i]->remove(shift+5, hash, key);
         if (node->size() > 0)
         {
-            return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, node),
+            return NodePtr(new ArrayNode(arrayUpdate(progeny_, 32, i, node),
                                          size() - 1));
         }
         else
@@ -490,7 +487,7 @@ struct ArrayNode : public Node<Key, Val>
             else
             {
                 return NodePtr(new ArrayNode(
-                                   arrayWith(progeny_, 32, i, NodePtr()),
+                                   arrayUpdate(progeny_, 32, i, NodePtr()),
                                    size() - 1));
             }
         }
@@ -583,8 +580,7 @@ struct BitmappedNode : public Node<Key, Val>
             indexType n = bitCount(bitmap_);
             if (n < 16)
             {
-                NodePtr const* newArray =
-                    arrayWithInsertion(progeny_, n, i, leaf);
+                NodePtr const* newArray = arrayInsert(progeny_, n, i, leaf);
                 hashType  newBitmap = bitmap_ | bit;
                 indexType newSize = size() + leaf->size();
                 return NodePtr(new BitmappedNode(newBitmap, newArray, newSize));
@@ -610,7 +606,7 @@ struct BitmappedNode : public Node<Key, Val>
             NodePtr v = progeny_[i];
             NodePtr node = v->insert(shift + 5, hash, leaf);
             NodePtr const* newArray = 
-                arrayWith(progeny_, bitCount(bitmap_), i, node);
+                arrayUpdate(progeny_, bitCount(bitmap_), i, node);
             indexType newSize = size() + node->size() - v->size();
             return NodePtr(new BitmappedNode(bitmap_, newArray, newSize));
         }
@@ -633,13 +629,13 @@ struct BitmappedNode : public Node<Key, Val>
         {
             newBitmap = bitmap_;
             newSize   = size() + node->size() - v->size();
-            newArray  = arrayWith(progeny_, bitCount(bitmap_), i, node);
+            newArray  = arrayUpdate(progeny_, bitCount(bitmap_), i, node);
         }
         else
         {
             newBitmap = bitmap_ ^ bit;
             newSize   = size() - 1;
-            newArray  = arrayWithout(progeny_, bitCount(bitmap_), i);
+            newArray  = arrayRemove(progeny_, bitCount(bitmap_), i);
         }
 
         indexType nrBits = bitCount(newBitmap);
