@@ -234,6 +234,20 @@ SUITE(PersistentMap)
             CHECK_EQUAL('d', *mod.get(key_d));
         }
     }
+
+    TEST(WildMix)
+    {
+        Map map;
+
+        int* keys = new int[17];
+        for (int i = 0; i < 17; ++i)
+        {
+            keys[i] = i * 5 + 7;
+            map = map.insert(keys[i], 10 * keys[i]);
+        }
+
+        CHECK_EQUAL(17, map.size());
+    }
 }
 
 int main()

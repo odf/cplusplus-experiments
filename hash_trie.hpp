@@ -697,17 +697,19 @@ public:
     {
     }
 
+    
+
     size_t size() const
     {
         return root_->size();
     }
 
-    ValPtr get(Key const key)
+    ValPtr get(Key const key) const
     {
         return root_->get(0, hashFunc(key), key);
     }
 
-    PersistentMap insert(Key const key, Val const val)
+    PersistentMap const insert(Key const key, Val const val) const
     {
         hashType hash = hashFunc(key);
         ValPtr current = root_->get(0, hash, key);
@@ -722,7 +724,7 @@ public:
         }
     }
 
-    PersistentMap remove(Key const key)
+    PersistentMap const remove(Key const key) const
     {
         hashType hash = hashFunc(key);
         if (root_->get(0, hash, key).get() != 0)
@@ -748,7 +750,7 @@ private:
     {
     }
 
-    NodePtr const root_;
+    NodePtr root_;
 };
 
 
