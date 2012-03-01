@@ -141,13 +141,11 @@ struct Node
                        hashType  const hash,
                        Key       const key) const = 0;
 
-    virtual NodePtr insert(NodePtr   const self,
-                           indexType const shift,
+    virtual NodePtr insert(indexType const shift,
                            hashType  const hash,
                            NodePtr   const leaf) const = 0;
 
-    virtual NodePtr remove(NodePtr   const self,
-                           indexType const shift,
+    virtual NodePtr remove(indexType const shift,
                            hashType  const hash,
                            Key       const key) const = 0;
 
@@ -179,20 +177,18 @@ struct EmptyNode : public Node<Key, Val>
         return ValPtr();
     }
 
-    NodePtr insert(NodePtr   const self,
-                   indexType const shift,
+    NodePtr insert(indexType const shift,
                    hashType  const hash,
                    NodePtr   const leaf) const
     {
         return leaf;
     }
 
-    NodePtr remove(NodePtr   const self,
-                   indexType const shift,
+    NodePtr remove(indexType const shift,
                    hashType  const hash,
                    Key       const key) const
     {
-        return self;
+        return NodePtr(new EmptyNode());
     }
 
     std::string asString() const
@@ -230,8 +226,7 @@ struct Leaf : public Node<Key, Val>
         return key == key_ ? value_ : ValPtr();
     }
 
-    NodePtr insert(NodePtr   const self,
-                   indexType const shift,
+    NodePtr insert(indexType const shift,
                    hashType  const hash,
                    NodePtr   const leaf) const
     {
@@ -247,13 +242,13 @@ struct Leaf : public Node<Key, Val>
             else
                 base = NodePtr(new BitmappedNode<Key, Val>());
 
-            NodePtr tmp = base->insert(base, shift, hash_, self);
-            return tmp->insert(tmp, shift, hash, leaf);
+            return base
+                ->insert(shift, hash_, clone())
+                ->insert(shift, hash, leaf);
         }
     }
 
-    NodePtr remove(NodePtr   const self,
-                   indexType const shift,
+    NodePtr remove(indexType const shift,
                    hashType  const hash,
                    Key       const key) const
     {
@@ -274,6 +269,11 @@ private:
     hashType const hash_;
     Key const key_;
     ValPtr const value_;
+
+    NodePtr const clone() const
+    {
+        return NodePtr(new Leaf(*this));
+    }
 };
 
 // ----------------------------------------------------------------------------
@@ -312,16 +312,15 @@ struct CollisionNode : public Node<Key, Val>
         return ValPtr();
     }
 
-    NodePtr insert(NodePtr   const self,
-                   indexType const shift,
+    NodePtr insert(indexType const shift,
                    hashType  const hash,
                    NodePtr   const leaf) const
     {
         if (hash != hash_)
         {
-            NodePtr base = NodePtr(new BitmappedNode<Key, Val>());
-            NodePtr tmp = base->insert(base, shift, hash_, self);
-            return tmp->insert(tmp, shift, hash, leaf);
+            return NodePtr(new BitmappedNode<Key, Val>())
+                ->insert(shift, hash_, clone())
+                ->insert(shift, hash, leaf);
         }
         else
         {
@@ -331,8 +330,7 @@ struct CollisionNode : public Node<Key, Val>
         }
     }
 
-    NodePtr remove(NodePtr   const self,
-                   indexType const shift,
+    NodePtr remove(indexType const shift,
                    hashType  const hash,
                    Key       const key) const
     {
@@ -377,6 +375,11 @@ private:
         : hash_(hash),
           bucket_(bucket)
     {
+    }
+
+    NodePtr const clone() const
+    {
+        return NodePtr(new CollisionNode(*this));
     }
 
     Bucket bucketWithout(Key const key) const
@@ -429,15 +432,14 @@ struct ArrayNode : public Node<Key, Val>
             return ValPtr();
     }
 
-    NodePtr insert(NodePtr   const self,
-                   indexType const shift,
+    NodePtr insert(indexType const shift,
                    hashType  const hash,
                    NodePtr   const leaf) const
     {
         indexType i = masked(hash, shift);
         if (progeny_[i].get() != 0)
         {
-            NodePtr node = progeny_[i]->insert(progeny_[i], shift+5, hash, leaf);
+            NodePtr node = progeny_[i]->insert(shift+5, hash, leaf);
             size_t newSize = size() + node->size() - progeny_[i]->size();
             return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, node),
                                          newSize));
@@ -449,13 +451,12 @@ struct ArrayNode : public Node<Key, Val>
         }
     }
 
-    NodePtr remove(NodePtr   const self,
-                   indexType const shift,
+    NodePtr remove(indexType const shift,
                    hashType  const hash,
                    Key       const key) const
     {
         indexType i = masked(hash, shift);
-        NodePtr node = progeny_[i]->remove(progeny_[i], shift+5, hash, key);
+        NodePtr node = progeny_[i]->remove(shift+5, hash, key);
         if (node->size() > 0)
         {
             return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, node),
@@ -570,8 +571,7 @@ struct BitmappedNode : public Node<Key, Val>
         }
     }
 
-    NodePtr insert(NodePtr   const self,
-                   indexType const shift,
+    NodePtr insert(indexType const shift,
                    hashType  const hash,
                    NodePtr   const leaf) const
     {
@@ -607,7 +607,7 @@ struct BitmappedNode : public Node<Key, Val>
         else
         {
             NodePtr v = progeny_[i];
-            NodePtr node = v->insert(v, shift + 5, hash, leaf);
+            NodePtr node = v->insert(shift + 5, hash, leaf);
             NodePtr const* newArray = 
                 arrayWith(progeny_, bitCount(bitmap_), i, node);
             indexType newSize = size() + node->size() - v->size();
@@ -615,15 +615,14 @@ struct BitmappedNode : public Node<Key, Val>
         }
     }
 
-    NodePtr remove(NodePtr   const self,
-                   indexType const shift,
+    NodePtr remove(indexType const shift,
                    hashType  const hash,
                    Key       const key) const
     {
         hashType bit = maskBit(hash, shift);
         indexType i = indexForBit(bitmap_, bit);
         NodePtr v = progeny_[i];
-        NodePtr node = v->remove(v, shift + 5, hash, key);
+        NodePtr node = v->remove(shift + 5, hash, key);
 
         hashType  newBitmap;
         indexType newSize;
@@ -715,7 +714,7 @@ public:
         if (current.get() == 0 or *current != val)
         {
             NodePtr leaf(new Leaf<Key, Val>(hash, key, ValPtr(new Val(val))));
-            return PersistentMap(root_->insert(root_, 0, hash, leaf));
+            return PersistentMap(root_->insert(0, hash, leaf));
         }
         else
         {
@@ -728,7 +727,7 @@ public:
         hashType hash = hashFunc(key);
         if (root_->get(0, hash, key).get() != 0)
         {
-            return PersistentMap(root_->remove(root_, 0, hash, key));
+            return PersistentMap(root_->remove(0, hash, key));
         }
         else
         {
