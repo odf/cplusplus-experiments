@@ -248,6 +248,8 @@ SUITE(PersistentMap)
         CHECK_EQUAL(17, map.size());
         for (int i = 0; i < 17; ++i)
             CHECK_EQUAL(10 * keys[i], *map.get(keys[i]));
+
+        delete[] keys;
     }
 
     SUITE(HundredsOfEntries)
