@@ -331,18 +331,14 @@ struct CollisionNode : public Node<Key, Val>
                    hashType  const hash,
                    Key       const key) const
     {
-        if (bucket_.size() < 2)
-        {
-            return NodePtr(new EmptyNode<Key, Val>());
-        }
-        else if (bucket_.size() == 2)
+        if (size() == 2)
         {
             if (bucket_.at(0)->key() != key)
                 return bucket_.at(0);
             else
                 return bucket_.at(1);
         }
-        else
+        else if (size() > 2)
         {
             return NodePtr(new CollisionNode(hash, bucketWithout(key)));
         }
@@ -639,18 +635,13 @@ struct BitmappedNode : public Node<Key, Val>
         }
 
         indexType nrBits = bitCount(newBitmap);
-        if (nrBits == 0)
-        {
-            delete[] newArray;
-            return NodePtr(new EmptyNode<Key, Val>());
-        }
-        else if (nrBits == 1 and newArray[0]->isLeaf())
+        if (nrBits == 1 and newArray[0]->isLeaf())
         {
             NodePtr result = newArray[0];
             delete[] newArray;
             return result;
         }
-        else
+        else if (nrBits > 0)
         {
             return NodePtr(new BitmappedNode(newBitmap, newArray, newSize));
         }
