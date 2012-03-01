@@ -238,7 +238,6 @@ SUITE(PersistentMap)
     TEST(WildMix)
     {
         Map map;
-
         int* keys = new int[17];
         for (int i = 0; i < 17; ++i)
         {
@@ -247,6 +246,104 @@ SUITE(PersistentMap)
         }
 
         CHECK_EQUAL(17, map.size());
+        for (int i = 0; i < 17; ++i)
+            CHECK_EQUAL(10 * keys[i], *map.get(keys[i]));
+    }
+
+    SUITE(HundredsOfEntries)
+    {
+        struct Fixture
+        {
+            Fixture()
+                : N(301)
+            {
+                for (int i = 0; i < N; ++i)
+                    baseMap = baseMap.insert(i, 10 * i);
+            }
+
+            int const N;
+            Map baseMap;
+        };
+ 
+        TEST_FIXTURE(Fixture, Basic)
+        {
+            Map map = baseMap;
+
+            CHECK_EQUAL(N, map.size());
+            for (int i = 0; i < N; ++i)
+                CHECK_EQUAL(10 * i, *map.get(i));
+            CHECK_MISSING(N+1, map);
+        }
+
+        TEST_FIXTURE(Fixture, RemoveSome)
+        {
+            Map map = baseMap;
+
+            int const M = 101;
+            for (int i = 0; i < M; ++i)
+                map = map.remove(i);
+
+            CHECK_EQUAL(N - M, map.size());
+            for (int i = 0; i < M; ++i)
+                CHECK_MISSING(i, map);
+            for (int i = M; i < N; ++i)
+                CHECK_EQUAL(10 * i, *map.get(i));
+        }
+
+        TEST_FIXTURE(Fixture, RemoveSomeNonMembers)
+        {
+            Map map = baseMap;
+
+            int const A = 1000;
+            int const B = 1101;
+            for (int i = A; i < B; ++i)
+                map = map.remove(i);
+
+            CHECK_EQUAL(N, map.size());
+            for (int i = 0; i < N; ++i)
+                CHECK_EQUAL(10 * i, *map.get(i));
+            for (int i = A; i < B; ++i)
+                CHECK_MISSING(i, map);
+        }
+
+        TEST_FIXTURE(Fixture, RemoveAll)
+        {
+            Map map = baseMap;
+            for (int i = 0; i < N; ++i)
+                map = map.remove(i);
+
+            CHECK_EQUAL(0, map.size());
+            for (int i = 0; i < N; ++i)
+                CHECK_MISSING(i, map);
+        }
+
+        TEST_FIXTURE(Fixture, UpdateSome)
+        {
+            Map map = baseMap;
+
+            int const M = 101;
+            for (int i = 0; i < M; ++i)
+                map = map.insert(i, 7 * i);
+
+            CHECK_EQUAL(N, map.size());
+            for (int i = 0; i < M; ++i)
+                CHECK_EQUAL(7 * i, *map.get(i));
+            for (int i = M; i < N; ++i)
+                CHECK_EQUAL(10 * i, *map.get(i));
+        }
+
+        TEST_FIXTURE(Fixture, ReInsertSome)
+        {
+            Map map = baseMap;
+
+            int const M = 101;
+            for (int i = 0; i < M; ++i)
+                map = map.insert(i, 10 * i);
+
+            CHECK_EQUAL(N, map.size());
+            for (int i = 0; i < N; ++i)
+                CHECK_EQUAL(10 * i, *map.get(i));
+        }
     }
 }
 
