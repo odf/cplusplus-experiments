@@ -146,10 +146,10 @@ struct Node
                            hashType  const hash,
                            NodePtr   const leaf) const = 0;
 
-    virtual NodePtr erase(NodePtr   const self,
-                          indexType const shift,
-                          hashType  const hash,
-                          Key       const key) const = 0;
+    virtual NodePtr remove(NodePtr   const self,
+                           indexType const shift,
+                           hashType  const hash,
+                           Key       const key) const = 0;
 
     virtual Key const& key() const {};
 
@@ -187,10 +187,10 @@ struct EmptyNode : public Node<Key, Val>
         return leaf;
     }
 
-    NodePtr erase(NodePtr   const self,
-                  indexType const shift,
-                  hashType  const hash,
-                  Key       const key) const
+    NodePtr remove(NodePtr   const self,
+                   indexType const shift,
+                   hashType  const hash,
+                   Key       const key) const
     {
         return self;
     }
@@ -252,10 +252,10 @@ struct Leaf : public Node<Key, Val>
         }
     }
 
-    NodePtr erase(NodePtr   const self,
-                  indexType const shift,
-                  hashType  const hash,
-                  Key       const key) const
+    NodePtr remove(NodePtr   const self,
+                   indexType const shift,
+                   hashType  const hash,
+                   Key       const key) const
     {
         return NodePtr(new EmptyNode<Key, Val>());
     }
@@ -331,10 +331,10 @@ struct CollisionNode : public Node<Key, Val>
         }
     }
 
-    NodePtr erase(NodePtr   const self,
-                  indexType const shift,
-                  hashType  const hash,
-                  Key       const key) const
+    NodePtr remove(NodePtr   const self,
+                   indexType const shift,
+                   hashType  const hash,
+                   Key       const key) const
     {
         if (bucket_.size() < 2)
         {
@@ -449,13 +449,13 @@ struct ArrayNode : public Node<Key, Val>
         }
     }
 
-    NodePtr erase(NodePtr   const self,
-                  indexType const shift,
-                  hashType  const hash,
-                  Key       const key) const
+    NodePtr remove(NodePtr   const self,
+                   indexType const shift,
+                   hashType  const hash,
+                   Key       const key) const
     {
         indexType i = masked(hash, shift);
-        NodePtr node = progeny_[i]->erase(progeny_[i], shift+5, hash, key);
+        NodePtr node = progeny_[i]->remove(progeny_[i], shift+5, hash, key);
         if (node->size() > 0)
         {
             return NodePtr(new ArrayNode(arrayWith(progeny_, 32, i, node),
@@ -615,15 +615,15 @@ struct BitmappedNode : public Node<Key, Val>
         }
     }
 
-    NodePtr erase(NodePtr   const self,
-                  indexType const shift,
-                  hashType  const hash,
-                  Key       const key) const
+    NodePtr remove(NodePtr   const self,
+                   indexType const shift,
+                   hashType  const hash,
+                   Key       const key) const
     {
         hashType bit = maskBit(hash, shift);
         indexType i = indexForBit(bitmap_, bit);
         NodePtr v = progeny_[i];
-        NodePtr node = v->erase(v, shift + 5, hash, key);
+        NodePtr node = v->remove(v, shift + 5, hash, key);
 
         hashType  newBitmap;
         indexType newSize;
@@ -715,9 +715,9 @@ public:
         return PersistentMap(root_->insert(root_, 0, hash, leaf));
     }
 
-    PersistentMap erase(Key const key)
+    PersistentMap remove(Key const key)
     {
-        return PersistentMap(root_->erase(root_, 0, hashFunc(key), key));
+        return PersistentMap(root_->remove(root_, 0, hashFunc(key), key));
     }
 
     std::string asString() const
