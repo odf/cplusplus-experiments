@@ -345,6 +345,68 @@ SUITE(PersistentMap)
                 CHECK_EQUAL(10 * i, *map.get(i));
         }
     }
+
+    TEST(LowerBitCollisions)
+    {
+        int keys[] = {
+            0x1ffffff,
+            0x3ffffff,
+            0x5ff0fff,
+            0x7ff0fff,
+            0x9ffffff,
+            0xbffffff,
+            0xdff0fff,
+            0xfff0fff
+        };
+
+        int N = sizeof(keys) / sizeof(int);
+        Map map;
+
+        for (int i = 0; i < N; ++i)
+            map = map.insert(keys[i], keys[i] >> 4);
+        CHECK_EQUAL(N, map.size());
+        for (int i = 0; i < N; ++i)
+            CHECK_EQUAL(keys[i] >> 4, *map.get(keys[i]));
+
+        for (int i = 1; i < N; ++i)
+            map = map.remove(keys[i]);
+        CHECK_EQUAL(1, map.size());
+        CHECK_EQUAL(keys[0] >> 4, *map.get(keys[0]));
+        CHECK_MISSING(keys[1], map);
+
+        map = map.remove(keys[0]);
+        CHECK_EQUAL(0, map.size());
+        CHECK_MISSING(keys[0], map);
+    }
+
+    TEST(HigherBitCollisions)
+    {
+        int keys[] = {
+            0x7ffffff1,
+            0x7ffffff3,
+            0x7fff0ff5,
+            0x7fff0ff7
+        };
+
+        int N = sizeof(keys) / sizeof(int);
+        Map map;
+
+        for (int i = 0; i < N; ++i)
+            map = map.insert(keys[i], keys[i] >> 4);
+        CHECK_EQUAL(N, map.size());
+        for (int i = 0; i < N; ++i)
+            CHECK_EQUAL(keys[i] >> 4, *map.get(keys[i]));
+
+        for (int i = 1; i < N; ++i)
+            map = map.remove(keys[i]);
+        CHECK_EQUAL(1, map.size());
+        CHECK_EQUAL(keys[0] >> 4, *map.get(keys[0]));
+        CHECK_MISSING(keys[1], map);
+
+        map = map.remove(keys[0]);
+        CHECK_EQUAL(0, map.size());
+        CHECK_MISSING(keys[0], map);
+    }
 }
 
 int main()
