@@ -100,17 +100,9 @@ SUITE(ArrayCopyOnWrite)
 
 SUITE(PersistentMap)
 {
+#define CHECK_MISSING(key, map) CHECK_EQUAL(None, (map).get(key).get())
+
     const void* None = 0;
-
-    TEST(EmptyMap)
-    {
-        Map map;
-
-        CHECK_EQUAL(0, map.size());
-        CHECK_EQUAL(None, map.get(0).get());
-        CHECK_EQUAL(0, map.remove(0).size());
-        CHECK_EQUAL("PersistentMap(EmptyNode)", map.asString());
-    }
 
     TEST(SimpleTest)
     {
@@ -121,7 +113,7 @@ SUITE(PersistentMap)
         CHECK_EQUAL(5, *map.get( 259));
         CHECK_EQUAL(6, *map.get(1027));
 
-        CHECK_EQUAL(None, map.get( 123).get());
+        CHECK_MISSING(123, map);
     }
 
     TEST(TwoInOneOut)
@@ -130,7 +122,69 @@ SUITE(PersistentMap)
 
         CHECK_EQUAL(1, map.size());
         CHECK_EQUAL(2, *map.get('B'));
-        CHECK_EQUAL(None, map.get('A').get());
+        CHECK_MISSING('A', map);
+    }
+
+    TEST(EmptyMap)
+    {
+        Map map;
+
+        CHECK_EQUAL(0, map.size());
+        CHECK_MISSING(0, map);
+        CHECK_EQUAL(0, map.remove(0).size());
+        CHECK_EQUAL("PersistentMap({})", map.asString());
+    }
+
+    TEST(SingletonMap)
+    {
+        Map map = Map().insert('A', 1);
+
+        CHECK_EQUAL(1, map.size());
+        CHECK_EQUAL(1, *map.get('A'));
+        CHECK_MISSING('B', map);
+        CHECK_EQUAL(0, map.remove('A').remove('A').size());
+        CHECK_EQUAL("PersistentMap(65 -> 1)", map.asString());
+    }
+
+    TEST(SingletonMapUpdate)
+    {
+        Map map = Map().insert('A', 1).insert('A', 65);
+
+        CHECK_EQUAL(1, map.size());
+        CHECK_EQUAL(65, *map.get('A'));
+        CHECK_MISSING('B', map);
+    }
+
+    SUITE(TwoItemsLevelOneCollision)
+    {
+        int const key_a = 1;
+        int const key_b = 33;
+        int const key_c = 5;
+
+        Map map = Map().insert(key_a, 'a').insert(key_b, 'b');
+
+        TEST(Basic)
+        {
+            CHECK_EQUAL(2, map.size());
+            CHECK_EQUAL('a', *map.get(key_a));
+            CHECK_EQUAL('a', *map.get(key_a));
+            CHECK_MISSING(key_c, map);
+            CHECK_EQUAL("PersistentMap({1: {0: 1 -> 97, 1: 33 -> 98}})",
+                        map.asString());
+
+            CHECK_EQUAL(1, map.remove(key_a).size());
+            CHECK_EQUAL(0, map.remove(key_a).remove(key_b).size());
+        }
+
+        TEST(RemoveNonMember)
+        {
+            Map mod = map.remove(key_c);
+
+            // CHECK_EQUAL(2, mod.size());
+            // CHECK_EQUAL('a', *mod.get(key_a));
+            // CHECK_EQUAL('a', *mod.get(key_a));
+            // CHECK_MISSING(key_c, mod);
+        }
     }
 }
 

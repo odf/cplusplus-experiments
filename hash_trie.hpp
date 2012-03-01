@@ -197,7 +197,7 @@ struct EmptyNode : public Node<Key, Val>
 
     std::string asString() const
     {
-        return "EmptyNode";
+        return "{}";
     }
 };
 
@@ -266,7 +266,7 @@ struct Leaf : public Node<Key, Val>
     std::string asString() const
     {
         std::stringstream ss;
-        ss << "Leaf(" << key_ << " -> " << *value_.get() << ")";
+        ss << key_ << " -> " << *value_.get();
         return ss.str();
     }
 
@@ -356,16 +356,16 @@ struct CollisionNode : public Node<Key, Val>
     std::string asString() const
     {
         std::stringstream ss;
-        ss << "CollisionNode(";
+        ss << "<";
         for (typename Bucket::const_iterator iter = bucket_.begin();
              iter != bucket_.end();
              ++iter)
         {
             if (iter != bucket_.begin())
-                ss << ", ";
+                ss << "| ";
             ss << (*iter)->asString();
         }
-        ss << ")";
+        ss << ">";
         return ss.str();
     }
         
@@ -498,7 +498,7 @@ struct ArrayNode : public Node<Key, Val>
     std::string asString() const
     {
         std::stringstream ss;
-        ss << "ArrayNode(";
+        ss << "[";
         int j = 0;
         for (int i = 0; i < 32; ++i)
         {
@@ -506,11 +506,11 @@ struct ArrayNode : public Node<Key, Val>
             {
                 if (j > 0)
                     ss << ", ";
-                ss << i << " -> " << progeny_[i]->asString();
+                ss << i << ": " << progeny_[i]->asString();
                 ++j;
             }
         }
-        ss << ")";
+        ss << "]";
         return ss.str();
     }
         
@@ -660,7 +660,7 @@ struct BitmappedNode : public Node<Key, Val>
     std::string asString() const
     {
         std::stringstream ss;
-        ss << "BitmappedNode(";
+        ss << "{";
         for (int i = 0; i < 32; ++i)
         {
             hashType bit = 1 << i;
@@ -669,10 +669,10 @@ struct BitmappedNode : public Node<Key, Val>
                 indexType j = indexForBit(bitmap_, bit);
                 if (j > 0)
                     ss << ", ";
-                ss << i << " -> " << progeny_[j]->asString();
+                ss << i << ": " << progeny_[j]->asString();
             }
         }
-        ss << ")";
+        ss << "}";
         return ss.str();
     }
         
@@ -711,13 +711,29 @@ public:
     PersistentMap insert(Key const key, Val const val)
     {
         hashType hash = hashFunc(key);
-        NodePtr leaf(new Leaf<Key, Val>(hash, key, ValPtr(new Val(val))));
-        return PersistentMap(root_->insert(root_, 0, hash, leaf));
+        ValPtr current = root_->get(0, hash, key);
+        if (current.get() == 0 or *current != val)
+        {
+            NodePtr leaf(new Leaf<Key, Val>(hash, key, ValPtr(new Val(val))));
+            return PersistentMap(root_->insert(root_, 0, hash, leaf));
+        }
+        else
+        {
+            return *this;
+        }
     }
 
     PersistentMap remove(Key const key)
     {
-        return PersistentMap(root_->remove(root_, 0, hashFunc(key), key));
+        hashType hash = hashFunc(key);
+        if (root_->get(0, hash, key).get() != 0)
+        {
+            return PersistentMap(root_->remove(root_, 0, hash, key));
+        }
+        else
+        {
+            return *this;
+        }
     }
 
     std::string asString() const
