@@ -60,6 +60,8 @@ SUITE(ArrayCopyOnWrite)
 
             for (int i = 0; i < 4; ++i)
                 CHECK_EQUAL(((i == k) ? 5 : i), out[i]);
+
+            delete[] out;
         }
     }
 
@@ -74,6 +76,8 @@ SUITE(ArrayCopyOnWrite)
             
             for (int i = 0; i < 5; ++i)
                 CHECK_EQUAL(((i < k) ? i : (i == k) ? 5 : i - 1), out[i]);
+
+            delete[] out;
         }
     }
 
@@ -88,6 +92,8 @@ SUITE(ArrayCopyOnWrite)
             
             for (int i = 0; i < 3; ++i)
                 CHECK_EQUAL(((i < k) ? i : i + 1), out[i]);
+
+            delete[] out;
         }
     }
 
@@ -95,6 +101,8 @@ SUITE(ArrayCopyOnWrite)
     {
         const int* x = arrayWithInsertion((int *) 0, 0, 0, 1);
         CHECK_EQUAL(1, x[0]);
+
+        delete[] x;
     }
 }
 

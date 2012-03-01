@@ -599,9 +599,8 @@ struct BitmappedNode : public Node<Key, Val>
                         newArray[j] = progeny_[indexForBit(bitmap_, b)];
                     }
                     newArray[masked(hash, shift)] = leaf;
-                    return NodePtr(new ArrayNode<Key, Val>(
-                                       newArray, size() + 1));
                 }
+                return NodePtr(new ArrayNode<Key, Val>(newArray, size() + 1));
             }
         }
         else
@@ -644,11 +643,14 @@ struct BitmappedNode : public Node<Key, Val>
         indexType nrBits = bitCount(newBitmap);
         if (nrBits == 0)
         {
+            delete[] newArray;
             return NodePtr(new EmptyNode<Key, Val>());
         }
         else if (nrBits == 1 and newArray[0]->isLeaf())
         {
-            return newArray[0];
+            NodePtr result = newArray[0];
+            delete[] newArray;
+            return result;
         }
         else
         {
