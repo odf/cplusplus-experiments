@@ -1,5 +1,6 @@
 CXXWARNS = -Wall -Wextra -pedantic
-CXXFLAGS = $(CXXWARNS) -g -O3
+CXXOPTS  = -g -O3
+CXXFLAGS = $(CXXWARNS) $(CXXOPTS)
 PROGRAMS = list_test hash_trie_test graph_test boost_mpi_test distributed_graph
 
 list_test:		list_test.o
