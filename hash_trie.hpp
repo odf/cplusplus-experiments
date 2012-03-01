@@ -360,7 +360,7 @@ struct CollisionNode : public Node<Key, Val>
              ++iter)
         {
             if (iter != bucket_.begin())
-                ss << "| ";
+                ss << " | ";
             ss << (*iter)->asString();
         }
         ss << ">";
@@ -585,12 +585,14 @@ struct BitmappedNode : public Node<Key, Val>
             {
                 NodePtr const* newArray =
                     arrayWithInsertion(progeny_, n, i, leaf);
-                return NodePtr(new BitmappedNode(
-                                   bitmap_ | bit, newArray, size() + 1));
+                hashType  newBitmap = bitmap_ | bit;
+                indexType newSize = size() + leaf->size();
+                return NodePtr(new BitmappedNode(newBitmap, newArray, newSize));
             }
             else
             {
                 NodePtr* newArray = new NodePtr[32];
+                indexType newSize = size() + leaf->size();
                 for (int j = 0; j < 32; ++j)
                 {
                     hashType b = 1 << j;
@@ -600,7 +602,7 @@ struct BitmappedNode : public Node<Key, Val>
                     }
                     newArray[masked(hash, shift)] = leaf;
                 }
-                return NodePtr(new ArrayNode<Key, Val>(newArray, size() + 1));
+                return NodePtr(new ArrayNode<Key, Val>(newArray, newSize));
             }
         }
         else

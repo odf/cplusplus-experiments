@@ -188,10 +188,50 @@ SUITE(PersistentMap)
         {
             Map mod = map.remove(key_c);
 
-            // CHECK_EQUAL(2, mod.size());
-            // CHECK_EQUAL('a', *mod.get(key_a));
-            // CHECK_EQUAL('a', *mod.get(key_a));
-            // CHECK_MISSING(key_c, mod);
+            CHECK_EQUAL(2, mod.size());
+            CHECK_EQUAL('a', *mod.get(key_a));
+            CHECK_EQUAL('a', *mod.get(key_a));
+            CHECK_MISSING(key_c, mod);
+        }
+    }
+
+    SUITE(ThreeItemsFullCollision)
+    {
+        int const key_a = 257;
+        int const key_b = 513;
+        int const key_c = 769;
+        int const key_d = 33;
+
+        Map map = Map().insert(key_a, 'a').insert(key_b, 'b').insert(key_c, 'c');
+
+        TEST(Basic)
+        {
+            CHECK_EQUAL("PersistentMap(<257 -> 97 | 513 -> 98 | 769 -> 99>)",
+                        map.asString());
+            CHECK_EQUAL(3, map.size());
+            CHECK_EQUAL('a', *map.get(key_a));
+            CHECK_EQUAL('b', *map.get(key_b));
+            CHECK_EQUAL('c', *map.get(key_c));
+        }
+
+        TEST(RemoveOneItem)
+        {
+            Map mod = map.remove(key_a);
+
+            CHECK_EQUAL(2, mod.size());
+            CHECK_EQUAL('b', *mod.get(key_b));
+            CHECK_EQUAL('c', *mod.get(key_c));
+        }
+
+        TEST(AddOneItem)
+        {
+            Map mod = map.insert(key_d, 'd');
+
+            CHECK_EQUAL(4, mod.size());
+            CHECK_EQUAL('a', *mod.get(key_a));
+            CHECK_EQUAL('b', *mod.get(key_b));
+            CHECK_EQUAL('c', *mod.get(key_c));
+            CHECK_EQUAL('d', *mod.get(key_d));
         }
     }
 }
