@@ -36,13 +36,11 @@ typedef uint8_t  indexType;
 // Bit counting and manipulation functions.
 // ----------------------------------------------------------------------------
 
-inline
 indexType masked(hashType const n, indexType const shift)
 {
     return (n >> shift) & 0x1f;
 }
 
-inline
 indexType bitCount(hashType n)
 {
     n -= (n >> 1) & 0x55555555;
@@ -52,13 +50,11 @@ indexType bitCount(hashType n)
     return (n + (n >> 16)) & 0x3f;
 }
 
-inline
 indexType indexForBit(hashType const bitmap, hashType const bit)
 {
     return bitCount(bitmap & (bit - 1));
 }
 
-inline
 hashType maskBit(hashType const n, indexType const shift)
 {
     return 1 << masked(n, shift);
@@ -70,7 +66,6 @@ hashType maskBit(hashType const n, indexType const shift)
 // ----------------------------------------------------------------------------
 
 template<typename T>
-inline
 T const* arrayUpdate(T const* source, int const len, int const pos, T const val)
 {
     T* copy = new T[len];
@@ -80,7 +75,6 @@ T const* arrayUpdate(T const* source, int const len, int const pos, T const val)
 }
 
 template<typename T>
-inline
 T const* arrayInsert(T const* source, int const len, int const pos, T const val)
 {
     T* copy = new T[len + 1];
@@ -93,7 +87,6 @@ T const* arrayInsert(T const* source, int const len, int const pos, T const val)
 }
 
 template<typename T>
-inline
 T const* arrayRemove(T const* source, int const len, int const pos)
 {
     T* copy = new T[len - 1];
@@ -681,8 +674,6 @@ public:
     {
     }
 
-    
-
     size_t size() const
     {
         return root_->size();
@@ -691,6 +682,15 @@ public:
     ValPtr get(Key const key) const
     {
         return root_->get(0, hashFunc(key), key);
+    }
+
+    Val getVal(Key const key, Val const notFound) const
+    {
+        ValPtr vp = get(key);
+        if (vp.get() != 0)
+            return *vp;
+        else
+            return notFound;
     }
 
     PersistentMap const insert(Key const key, Val const val) const
