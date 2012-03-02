@@ -440,7 +440,7 @@ struct ArrayNode : public Node<Key, Val>
         else
         {
             return NodePtr(new ArrayNode(arrayUpdate(progeny_, 32, i, leaf),
-                                         size() + 1));
+                                         size() + leaf->size()));
         }
     }
 
@@ -578,13 +578,13 @@ struct BitmappedNode : public Node<Key, Val>
             {
                 NodePtr const* newArray = arrayInsert(progeny_, n, i, leaf);
                 hashType  newBitmap = bitmap_ | bit;
-                indexType newSize = size() + leaf->size();
+                size_t newSize = size() + leaf->size();
                 return NodePtr(new BitmappedNode(newBitmap, newArray, newSize));
             }
             else
             {
                 NodePtr* newArray = new NodePtr[32];
-                indexType newSize = size() + leaf->size();
+                size_t newSize = size() + leaf->size();
                 for (int j = 0; j < 32; ++j)
                 {
                     hashType b = 1 << j;
@@ -603,7 +603,7 @@ struct BitmappedNode : public Node<Key, Val>
             NodePtr node = v->insert(shift + 5, hash, leaf);
             NodePtr const* newArray = 
                 arrayUpdate(progeny_, bitCount(bitmap_), i, node);
-            indexType newSize = size() + node->size() - v->size();
+            size_t newSize = size() + node->size() - v->size();
             return NodePtr(new BitmappedNode(bitmap_, newArray, newSize));
         }
     }
@@ -617,8 +617,8 @@ struct BitmappedNode : public Node<Key, Val>
         NodePtr v = progeny_[i];
         NodePtr node = v->remove(shift + 5, hash, key);
 
-        hashType  newBitmap;
-        indexType newSize;
+        hashType newBitmap;
+        size_t   newSize;
         NodePtr const*  newArray;
 
         if (node->size() > 0)
