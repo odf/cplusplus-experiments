@@ -10,7 +10,6 @@
 #ifndef ODF_HASH_TRIE_HPP
 #define ODF_HASH_TRIE_HPP 1
 
-#include <cstring>
 #include <stdint.h>
 #include <vector>
 #include <sstream>
@@ -21,12 +20,6 @@
 #include <tr1/memory>
 #else
 #include <boost/tr1/memory.hpp>
-#endif
-
-#ifdef BOOST_HAS_TR1_HASH
-#include <functional>
-#else
-#include <boost/tr1/functional.hpp>
 #endif
 
 
