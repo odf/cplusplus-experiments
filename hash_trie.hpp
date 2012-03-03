@@ -347,6 +347,7 @@ struct CollisionNode : public Node<Key, Val>
                    hashType  const hash,
                    Key       const key) const
     {
+        assert(size() >= 2);
         if (size() == 2)
         {
             if (bucket_.at(0)->key() != key)
@@ -354,7 +355,7 @@ struct CollisionNode : public Node<Key, Val>
             else
                 return bucket_.at(1);
         }
-        else if (size() > 2)
+        else
         {
             return NodePtr(new CollisionNode(hash, bucketWithout(key)));
         }
@@ -540,8 +541,8 @@ struct BitmappedNode : public Node<Key, Val>
     typename Node<Key, Val>::NodePtr typedef NodePtr;
 
     BitmappedNode()
-        : progeny_(0),
-          bitmap_(0),
+        : bitmap_(0),
+          progeny_(0),
           size_(0)
     {
     }
@@ -651,13 +652,14 @@ struct BitmappedNode : public Node<Key, Val>
         }
 
         indexType nrBits = bitCount(newBitmap);
+        assert(nrBits > 0);
         if (nrBits == 1 and newArray[0]->isLeaf())
         {
             NodePtr result = newArray[0];
             delete[] newArray;
             return result;
         }
-        else if (nrBits > 0)
+        else
         {
             return NodePtr(new BitmappedNode(newBitmap, newArray, newSize));
         }
@@ -683,8 +685,8 @@ struct BitmappedNode : public Node<Key, Val>
     }
         
 private:
-    NodePtr const* progeny_;
     hashType const bitmap_;
+    NodePtr const* progeny_;
     size_t const size_;
 };
 
