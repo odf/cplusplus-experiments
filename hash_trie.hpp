@@ -14,13 +14,7 @@
 #include <vector>
 #include <sstream>
 
-#include <boost/config.hpp>
-
-#ifdef BOOST_HAS_TR1_SHARED_PTR
-#include <tr1/memory>
-#else
-#include <boost/tr1/memory.hpp>
-#endif
+#include <boost/smart_ptr.hpp>
 
 
 namespace odf
@@ -113,8 +107,8 @@ template<typename Key, typename Val> class BitmappedNode;
 template<typename Key, typename Val>
 struct Node
 {
-    typename std::tr1::shared_ptr<Val>             typedef ValPtr;
-    typename std::tr1::shared_ptr<Node<Val, Key> > typedef NodePtr;
+    typename boost::shared_ptr<Val>     typedef ValPtr;
+    typename boost::intrusive_ptr<Node> typedef NodePtr;
 
     virtual size_t size() const = 0;
 
@@ -135,6 +129,40 @@ struct Node
     virtual Key const& key() const {};
 
     virtual std::string asString() const = 0;
+
+    template<typename Derived>
+    friend void intrusive_ptr_add_ref(const Derived* p)
+    {
+        ++((const Node*) p)->counter_;
+    }
+
+    template<typename Derived>
+    friend void intrusive_ptr_release(const Derived* p)
+    {
+        if (--((const Node*) p)->counter_ == 0)
+            delete p;
+    }
+
+protected:
+    Node()
+        : counter_(0)
+    {
+    }
+
+    Node(Node const&)
+        : counter_(0)
+    {
+    }
+
+    virtual ~Node() {};
+
+    Node& operator=(Node const&)
+    {
+        return *this;
+    }
+
+private:
+    mutable size_t counter_;
 };
 
 // ----------------------------------------------------------------------------
@@ -148,6 +176,8 @@ struct EmptyNode : public Node<Key, Val>
     typename Node<Key, Val>::NodePtr typedef NodePtr;
 
     EmptyNode() {}
+
+    ~EmptyNode() {}
 
     size_t size() const { return 0; }
 
@@ -197,6 +227,8 @@ struct Leaf : public Node<Key, Val>
           value_(value)
     {
     }
+
+    ~Leaf() {}
 
     size_t size() const { return 1; }
 
