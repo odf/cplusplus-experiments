@@ -447,18 +447,14 @@ struct ArrayNode : public Node<Key, Val>
                    NodePtr   const leaf) const
     {
         indexType i = masked(hash, shift);
-        if (progeny_[i].get() != 0)
-        {
-            NodePtr node = progeny_[i]->insert(shift+5, hash, leaf);
-            size_t newSize = size() + node->size() - progeny_[i]->size();
-            return NodePtr(new ArrayNode(arrayUpdate(progeny_, 32, i, node),
-                                         newSize));
-        }
-        else
-        {
-            return NodePtr(new ArrayNode(arrayUpdate(progeny_, 32, i, leaf),
-                                         size() + leaf->size()));
-        }
+        NodePtr oldNode = progeny_[i];
+        bool const recur = oldNode.get() != 0;
+
+        NodePtr newNode = recur ? oldNode->insert(shift+5, hash, leaf) : leaf;
+        size_t added = recur ? newNode->size() - oldNode->size() : leaf->size();
+
+        return NodePtr(new ArrayNode(arrayUpdate(progeny_, 32, i, newNode),
+                                     size() + added));
     }
 
     NodePtr remove(indexType const shift,
@@ -587,13 +583,13 @@ struct BitmappedNode : public Node<Key, Val>
     {
         hashType bit = maskBit(hash, shift);
         indexType i = indexForBit(bitmap_, bit);
+        indexType nrBits = bitCount(bitmap_);
         
         if ((bitmap_ & bit) == 0)
         {
-            indexType n = bitCount(bitmap_);
-            if (n < 16)
+            if (nrBits < 16)
             {
-                NodePtr const* newArray = arrayInsert(progeny_, n, i, leaf);
+                NodePtr const* newArray = arrayInsert(progeny_, nrBits, i, leaf);
                 hashType  newBitmap = bitmap_ | bit;
                 size_t newSize = size() + leaf->size();
                 return NodePtr(new BitmappedNode(newBitmap, newArray, newSize));
@@ -618,8 +614,7 @@ struct BitmappedNode : public Node<Key, Val>
         {
             NodePtr v = progeny_[i];
             NodePtr node = v->insert(shift + 5, hash, leaf);
-            NodePtr const* newArray = 
-                arrayUpdate(progeny_, bitCount(bitmap_), i, node);
+            NodePtr const* newArray = arrayUpdate(progeny_, nrBits, i, node);
             size_t newSize = size() + node->size() - v->size();
             return NodePtr(new BitmappedNode(bitmap_, newArray, newSize));
         }
