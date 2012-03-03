@@ -130,16 +130,14 @@ struct Node
 
     virtual std::string asString() const = 0;
 
-    template<typename Derived>
-    friend void intrusive_ptr_add_ref(const Derived* p)
+    friend void intrusive_ptr_add_ref(Node const* const p)
     {
-        ++((const Node*) p)->counter_;
+        ++p->counter_;
     }
 
-    template<typename Derived>
-    friend void intrusive_ptr_release(const Derived* p)
+    friend void intrusive_ptr_release(Node const* const p)
     {
-        if (--((const Node*) p)->counter_ == 0)
+        if (--p->counter_ == 0)
             delete p;
     }
 
