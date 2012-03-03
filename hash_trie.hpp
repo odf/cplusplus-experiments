@@ -585,38 +585,37 @@ struct BitmappedNode : public Node<Key, Val>
         indexType i = indexForBit(bitmap_, bit);
         indexType nrBits = bitCount(bitmap_);
         
-        if ((bitmap_ & bit) == 0)
+        if ((bitmap_ & bit) == 0 && nrBits >= 16)
         {
-            if (nrBits < 16)
+            NodePtr* newArray = new NodePtr[32];
+            size_t newSize = size() + leaf->size();
+            for (int j = 0; j < 32; ++j)
             {
-                NodePtr const* newArray = arrayInsert(progeny_, nrBits, i, leaf);
-                hashType  newBitmap = bitmap_ | bit;
-                size_t newSize = size() + leaf->size();
-                return NodePtr(new BitmappedNode(newBitmap, newArray, newSize));
+                hashType b = 1 << j;
+                if ((bitmap_ & b) != 0)
+                    newArray[j] = progeny_[indexForBit(bitmap_, b)];
             }
-            else
-            {
-                NodePtr* newArray = new NodePtr[32];
-                size_t newSize = size() + leaf->size();
-                for (int j = 0; j < 32; ++j)
-                {
-                    hashType b = 1 << j;
-                    if ((bitmap_ & b) != 0)
-                    {
-                        newArray[j] = progeny_[indexForBit(bitmap_, b)];
-                    }
-                    newArray[masked(hash, shift)] = leaf;
-                }
-                return NodePtr(new ArrayNode<Key, Val>(newArray, newSize));
-            }
+            newArray[masked(hash, shift)] = leaf;
+            return NodePtr(new ArrayNode<Key, Val>(newArray, newSize));
         }
         else
         {
-            NodePtr v = progeny_[i];
-            NodePtr node = v->insert(shift + 5, hash, leaf);
-            NodePtr const* newArray = arrayUpdate(progeny_, nrBits, i, node);
-            size_t newSize = size() + node->size() - v->size();
-            return NodePtr(new BitmappedNode(bitmap_, newArray, newSize));
+            NodePtr const* newArray;
+            size_t newSize;
+
+            if ((bitmap_ & bit) == 0)
+            {
+                newArray = arrayInsert(progeny_, nrBits, i, leaf);
+                newSize = size() + leaf->size();
+            }
+            else
+            {
+                NodePtr oldNode = progeny_[i];
+                NodePtr newNode = oldNode->insert(shift + 5, hash, leaf);
+                newArray = arrayUpdate(progeny_, nrBits, i, newNode);
+                newSize = size() + newNode->size() - oldNode->size();
+            }
+            return NodePtr(new BitmappedNode(bitmap_ | bit, newArray, newSize));
         }
     }
 
