@@ -166,6 +166,12 @@ L dropList(const L list, const int n)
 }
 
 template<typename L>
+typename L::value_type pickList(L const list, int const n)
+{
+    return dropList(list, n).first();
+}
+
+template<typename L>
 L reverseList(const L& list)
 {
     L result;
