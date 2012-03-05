@@ -624,7 +624,7 @@ compose(const Lft lft, const Rgt rgt)
     return typename composerTraits<Lft, Rgt>::result_type(
         function_traits<Lft>::wrap(lft),
         function_traits<Rgt>::wrap(rgt));
-};
+}
 
 template<typename F>
 inline typename function_traits<F>::wrapper_type method(const F fun)
