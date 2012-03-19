@@ -129,13 +129,6 @@ public:
     }
 };
 
-template<typename T>
-Thunk<T> makeExplicitThunk(const T& value)
-{
-    return Thunk<T>(std::tr1::shared_ptr<AbstractThunkImpl<T> >(
-                        new ThunkImpl<T, T(*)()>(value)));
-}
-
 template<typename T, typename Functor>
 Thunk<T> makeThunk(const Functor& code)
 {

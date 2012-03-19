@@ -92,7 +92,7 @@ inline List<T> makeList(const T& first)
 template<typename T>
 inline List<T> makeList(const T& first, const List<T>& rest)
 {
-    return List<T>(first, makeExplicitThunk(rest));
+    return List<T>(first, Thunk<List<T> >(rest));
 }
 
 template<typename T, typename Functor>
