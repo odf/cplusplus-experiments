@@ -20,7 +20,8 @@ template<typename T>
 class AbstractThunkImpl
 {
 public:
-    virtual const T operator() () = 0;
+    virtual T operator() () const = 0;
+    virtual ~AbstractThunkImpl() {};
 };
 
 template<typename T, typename Functor>
@@ -29,9 +30,9 @@ class ThunkImpl : public AbstractThunkImpl<T>
 private:
     typename std::tr1::shared_ptr<Functor> typedef FunPtr;
 
-    FunPtr code_;
-    bool pending_;
-    T value_;
+    mutable FunPtr code_;
+    mutable bool pending_;
+    mutable T value_;
 
 public:
     ThunkImpl() :
@@ -41,25 +42,25 @@ public:
         log << "--Making empty ThunkImpl   " << this << std::endl;
     }
 
-    explicit ThunkImpl(const Functor& code) :
-        code_(FunPtr(new Functor(code))),
-        pending_(true)
+    explicit ThunkImpl(Functor const& code)
+        : code_(FunPtr(new Functor(code))),
+          pending_(true)
     {
         log << "--Making delayed ThunkImpl " << this << std::endl;
     }
 
-    explicit ThunkImpl(const T& value) :
-        code_(),
-        pending_(false),
-        value_(value)
+    explicit ThunkImpl(T const& value)
+        : code_(),
+          pending_(false),
+          value_(value)
     {
         log << "--Making direct ThunkImpl  " << this << std::endl;
     }
 
-    ThunkImpl(const ThunkImpl& other) :
-        code_(other.code_),
-        pending_(other.pending_),
-        value_(other.value_)
+    ThunkImpl(ThunkImpl const& other)
+        : code_(other.code_),
+          pending_(other.pending_),
+          value_(other.value_)
     {
         log << "----Copying ThunkImpl      " << other << "  => "
             << this << std::endl;
@@ -70,7 +71,7 @@ public:
         log << "----Destroying ThunkImpl   " << this << std::endl;
     }
 
-    const T operator() ()
+    T operator() () const
     {
         if (pending_)
         {
@@ -86,11 +87,8 @@ public:
 template<typename T>
 class Thunk
 {
-private:
-    typename std::tr1::shared_ptr<AbstractThunkImpl<T> > typedef ThunkPtr;
+    typename std::tr1::shared_ptr<AbstractThunkImpl<T> const> typedef ThunkPtr;
     typedef T(*FunPtr)();
-
-    ThunkPtr content_;
 
 public:
     Thunk() :
@@ -98,18 +96,13 @@ public:
     {
     }
 
-    Thunk(const ThunkPtr& code) :
-        content_(code)
+    explicit Thunk(FunPtr const& code)
+        : content_(ThunkPtr(new ThunkImpl<T, FunPtr>(code)))
     {
     }
 
-    explicit Thunk(const FunPtr& code) :
-        content_(ThunkPtr(new ThunkImpl<T, FunPtr>(code)))
-    {
-    }
-
-    explicit Thunk(const T& value) :
-        content_(ThunkPtr(new ThunkImpl<T, FunPtr>(value)))
+    explicit Thunk(T const& value)
+        : content_(ThunkPtr(new ThunkImpl<T, FunPtr>(value)))
     {
     }
 
@@ -123,17 +116,27 @@ public:
         return content_.get() == 0;
     }
 
-    bool operator==(const Thunk& other) const
+    bool operator==(Thunk const& other) const
     {
         return content_.get() == other.content_.get();
     }
+
+private:
+    ThunkPtr content_;
+
+    Thunk(AbstractThunkImpl<T> const* code) :
+        content_(ThunkPtr(code))
+    {
+    }
+
+    template<typename S, typename Functor>
+    friend Thunk<S> makeThunk(Functor const& code);
 };
 
 template<typename T, typename Functor>
-Thunk<T> makeThunk(const Functor& code)
+Thunk<T> makeThunk(Functor const& code)
 {
-    return Thunk<T>(std::tr1::shared_ptr<AbstractThunkImpl<T> >(
-                        new ThunkImpl<T, Functor>(code)));
+    return Thunk<T>(new ThunkImpl<T, Functor>(code));
 }
 
 }
