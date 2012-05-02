@@ -45,12 +45,12 @@ void CHECK_EQUAL_LISTS(const S(&left)[N], List<T> const right)
 SUITE(Fibonacci)
 {
     template<typename T>
-    List<T> fibonacci(T const a, T const b)
+    List<T> fibonacci(T const a = 0, T const b = 1)
     {
         return makeList(a, curry(fibonacci<T>, b, a + b));
     }
 
-    List<Integer> fib = fibonacci(Integer(0), Integer(1));
+    List<Integer> fib = fibonacci<Integer>();
 
     TEST(First15)
     {
